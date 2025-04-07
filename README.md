@@ -4,7 +4,7 @@
 food-review-demo/
 ├── app/                      # 主应用目录
 │   ├── __init__.py           # 应用工厂函数和初始化
-│   ├── models/               # 数据模型和Gremlin操作  hayasiakane
+│   ├── models/               # 数据模型和Gremlin操作   负责人：hayasiakane
 │   │   ├── __init__.py
 │   │   ├── user.py           # 用户相关操作
 │   │   ├── restaurant.py     # 餐厅相关操作
@@ -39,17 +39,19 @@ food-review-demo/
 │   │   ├── auth.py           # 认证工具
 │   │   └── decorators.py     # 装饰器
 │   └── config.py             # 应用配置
-├── tests/                    # 测试目录
+├── tests/                    # 测试目录 目前没有
 │   ├── __init__.py
 │   ├── test_models/
 │   └── test_routes/
 ├── migrations/               # 数据库迁移脚本(如果需要),暂时没有
 ├── venv/                     # Python虚拟环境(不应提交到版本控制)
 ├── .env                      # 环境变量
-├── .gitignore                # Git忽略规则
-├── requirements.txt          # Python依赖
+├── .gitignore                # Git忽略规则  当前文件夹你有什么不想被提交上去的可以写进去
+├── requirements.txt          # Python依赖 开发过程中有用到什么新的库也要即时添加进去
 ├── README.md                 # 项目说明
 └── run.py                    # 网站启动文件
+└── config.py                    # 配置文件
+└──init.py                    # 项目初始化文件
 └── tomo.bat                    # 应用启动脚本 一般是用这个去更新你在开发中新添加的python模块，并且每次都是用这个去打开网站，然后用跳出来的地址去打开网站
 
 ## github协同开发说明
