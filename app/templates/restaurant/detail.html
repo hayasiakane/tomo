@@ -1,0 +1,280 @@
+{% extends "base.html" %}
+
+{% block title %}{{ restaurant.name }} - 美食点评网{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h1 class="card-title">{{ restaurant.name }}</h1>
+                        <div class="rating mb-2">
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-half"></i>
+                            <span class="ms-1">4.5 ({{ restaurant.reviewCount }}条评价)</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-outline-primary" id="write-review-btn">写评价</button>
+                </div>
+                
+                <p class="text-muted">
+                    <i class="bi bi-geo-alt"></i> {{ restaurant.address }}
+                </p>
+                
+                <p>
+                    <span class="badge bg-secondary">{{ restaurant.cuisine }}</span>
+                </p>
+                
+                <p class="card-text">{{ restaurant.description }}</p>
+                
+                <div class="mt-4">
+                    <h5>营业时间</h5>
+                    <p>周一至周日: 10:00 - 22:00</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">联系方式</h5>
+                <p><i class="bi bi-telephone"></i> 123-4567-8910</p>
+                <p><i class="bi bi-globe"></i> www.example.com</p>
+                
+                <div class="mt-4">
+                    <h5>位置</h5>
+                    <div id="map" style="height: 200px; background-color: #eee; border-radius: 5px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2>评价</h2>
+            <div class="dropdown">
+                <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="sort-reviews" data-bs-toggle="dropdown">
+                    排序方式
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="#" data-sort="latest">最新评价</a></li>
+                    <li><a class="dropdown-item" href="#" data-sort="highest">最高评分</a></li>
+                    <li><a class="dropdown-item" href="#" data-sort="lowest">最低评分</a></li>
+                </ul>
+            </div>
+        </div>
+        
+        <div id="reviews-container">
+            <!-- 评价将通过JavaScript动态加载 -->
+            <div class="text-center py-4">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">加载中...</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 添加评价表单 (默认隐藏) -->
+        <div class="card mt-4 d-none" id="review-form-container">
+            <div class="card-body">
+                <h5 class="card-title">添加评价</h5>
+                <form id="review-form">
+                    <div class="mb-3">
+                        <label class="form-label">评分</label>
+                        <div class="rating-input">
+                            <i class="bi bi-star fs-3" data-rating="1"></i>
+                            <i class="bi bi-star fs-3" data-rating="2"></i>
+                            <i class="bi bi-star fs-3" data-rating="3"></i>
+                            <i class="bi bi-star fs-3" data-rating="4"></i>
+                            <i class="bi bi-star fs-3" data-rating="5"></i>
+                            <input type="hidden" name="rating" id="rating-value" value="0">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="review-content" class="form-label">评价内容</label>
+                        <textarea class="form-control" id="review-content" rows="3" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">提交评价</button>
+                    <button type="button" class="btn btn-outline-secondary ms-2" id="cancel-review">取消</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const restaurantId = window.location.pathname.split('/')[2];
+    
+    // 加载评价
+    function loadReviews(sort = 'latest') {
+        axios.get(`/api/restaurants/${restaurantId}/reviews?sort=${sort}`)
+            .then(response => {
+                const container = document.getElementById('reviews-container');
+                container.innerHTML = '';
+                
+                if (response.data.reviews.length === 0) {
+                    container.innerHTML = `
+                        <div class="alert alert-info">
+                            暂无评价，成为第一个评价的人吧！
+                        </div>
+                    `;
+                    return;
+                }
+                
+                response.data.reviews.forEach(review => {
+                    const reviewHtml = `
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <h5 class="card-title">${review.user.name}</h5>
+                                    <div class="rating">
+                                        ${'<i class="bi bi-star-fill"></i>'.repeat(review.rating)}
+                                        ${'<i class="bi bi-star"></i>'.repeat(5 - review.rating)}
+                                    </div>
+                                </div>
+                                <p class="card-text">${review.content}</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">${new Date(review.timestamp).toLocaleDateString()}</small>
+                                    ${review.reply ? `<button class="btn btn-sm btn-outline-primary" data-bs-toggle="collapse" data-bs-target="#reply-${review.reviewId}">查看回复</button>` : ''}
+                                </div>
+                                
+                                ${review.reply ? `
+                                <div class="collapse mt-3" id="reply-${review.reviewId}">
+                                    <div class="card card-body bg-light">
+                                        <div class="d-flex justify-content-between">
+                                            <strong>商家回复</strong>
+                                            <small class="text-muted">${new Date(review.reply.timestamp).toLocaleDateString()}</small>
+                                        </div>
+                                        <p>${review.reply.content}</p>
+                                    </div>
+                                </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    `;
+                    container.innerHTML += reviewHtml;
+                });
+            })
+            .catch(error => {
+                console.error('获取评价失败:', error);
+            });
+    }
+    
+    // 初始加载评价
+    loadReviews();
+    
+    // 排序评价
+    document.querySelectorAll('[data-sort]').forEach(item => {
+        item.addEventListener('click', function(e) {
+            e.preventDefault();
+            const sort = this.getAttribute('data-sort');
+            loadReviews(sort);
+        });
+    });
+    
+    // 显示/隐藏评价表单
+    document.getElementById('write-review-btn').addEventListener('click', function() {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = '/login?returnTo=' + encodeURIComponent(window.location.pathname);
+            return;
+        }
+        
+        document.getElementById('review-form-container').classList.remove('d-none');
+        this.disabled = true;
+    });
+    
+    document.getElementById('cancel-review').addEventListener('click', function() {
+        document.getElementById('review-form-container').classList.add('d-none');
+        document.getElementById('write-review-btn').disabled = false;
+    });
+    
+    // 评分选择
+    document.querySelectorAll('.rating-input i').forEach(star => {
+        star.addEventListener('click', function() {
+            const rating = parseInt(this.getAttribute('data-rating'));
+            document.getElementById('rating-value').value = rating;
+            
+            // 更新星星显示
+            document.querySelectorAll('.rating-input i').forEach((s, index) => {
+                if (index < rating) {
+                    s.classList.remove('bi-star');
+                    s.classList.add('bi-star-fill');
+                } else {
+                    s.classList.remove('bi-star-fill');
+                    s.classList.add('bi-star');
+                }
+            });
+        });
+    });
+    
+    // 提交评价
+    document.getElementById('review-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const token = localStorage.getItem('token');
+        const userId = localStorage.getItem('userId');
+        const rating = document.getElementById('rating-value').value;
+        const content = document.getElementById('review-content').value;
+        
+        if (!token || !userId) {
+            window.location.href = '/login';
+            return;
+        }
+        
+        if (rating === '0') {
+            alert('请选择评分');
+            return;
+        }
+        
+        axios.post(`/api/restaurants/${restaurantId}/reviews`, {
+            content: content,
+            rating: rating
+        }, {
+            headers: {
+                'X-User-ID': userId,
+                'Authorization': `Bearer ${token}`
+            }
+        })
+        .then(response => {
+            alert('评价提交成功！');
+            document.getElementById('review-form').reset();
+            document.getElementById('review-form-container').classList.add('d-none');
+            document.getElementById('write-review-btn').disabled = false;
+            
+            // 重置星星
+            document.querySelectorAll('.rating-input i').forEach(star => {
+                star.classList.remove('bi-star-fill');
+                star.classList.add('bi-star');
+            });
+            document.getElementById('rating-value').value = '0';
+            
+            // 重新加载评价
+            loadReviews();
+        })
+        .catch(error => {
+            console.error('提交评价失败:', error);
+            alert('提交评价失败: ' + (error.response?.data?.error || '请稍后再试'));
+        });
+    });
+    
+    // 简单的地图初始化
+    function initMap() {
+        // 这里可以集成真实的地图服务如Google Maps或百度地图
+        const mapElement = document.getElementById('map');
+        mapElement.innerHTML = '<div class="d-flex justify-content-center align-items-center h-100 text-muted">地图位置</div>';
+    }
+    
+    initMap();
+});
+</script>
+{% endblock %}

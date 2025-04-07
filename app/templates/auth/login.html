@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}登录 - 美食点评网{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body p-5">
+                <h2 class="card-title text-center mb-4">登录</h2>
+                
+                <form id="login-form">
+                    <div class="mb-3">
+                        <label for="email" class="form-label">电子邮箱</label>
+                        <input type="email" class="form-control" id="email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">密码</label>
+                        <input type="password" class="form-control" id="password" required>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">登录</button>
+                    </div>
+                </form>
+                
+                <div class="text-center mt-3">
+                    <p>还没有账号？<a href="/register">立即注册</a></p>
+                    <p><a href="/forgot-password">忘记密码？</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 检查是否已登录
+    const token = localStorage.getItem('token');
+    if (token) {
+        window.location.href = '/';
+    }
+    
+    // 处理登录表单提交
+    document.getElementById('login-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        
+        axios.post('/api/users/login', {
+    email: document.getElementById('email').value,
+    password: document.getElementById('password').value
+}, {
+    headers: {
+        'Content-Type': 'application/json'
+    }
+})
+.then(response => {
+    // 保存登录状态
+    localStorage.setItem('token', response.data.token);
+    localStorage.setItem('userId', response.data.userId);
+    window.location.href = '/';  // 跳转到首页
+})
+.catch(error => {
+    console.error('登录失败详情:', error.response);
+    alert(error.response?.data?.error || '登录失败');
+});
+    });
+});
+</script>
+{% endblock %}

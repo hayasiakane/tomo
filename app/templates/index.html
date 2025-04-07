@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="hero-section bg-light rounded-3 p-5 mb-4">
+    <div class="row align-items-center">
+        <div class="col-md-6">
+            <h1 class="display-4 fw-bold">发现身边的美食</h1>
+            <p class="lead">探索本地最佳餐厅，分享你的美食体验</p>
+            <div class="d-grid gap-2 d-md-flex">
+                <a href="/restaurants" class="btn btn-primary btn-lg px-4 me-md-2">浏览餐厅</a>
+                <a href="/register" class="btn btn-outline-secondary btn-lg px-4">注册账号</a>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" 
+                 class="img-fluid rounded-3" alt="餐厅图片">
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <h2 class="mb-4">热门餐厅</h2>
+        <div class="row" id="featured-restaurants">
+            <!-- 动态加载热门餐厅 -->
+            <div class="col-12 text-center">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">加载中...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-4">最新评价</h2>
+        <div class="row" id="latest-reviews">
+            <!-- 动态加载最新评价 -->
+            <div class="col-12 text-center">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">加载中...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 获取热门餐厅
+    axios.get('/api/restaurants?limit=4')
+        .then(response => {
+            const container = document.getElementById('featured-restaurants');
+            container.innerHTML = '';
+            
+            response.data.restaurants.forEach(restaurant => {
+                const card = `
+                    <div class="col-md-3 mb-4">
+                        <div class="card h-100 restaurant-card">
+                            <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" 
+                                 class="card-img-top" alt="${restaurant.name}">
+                            <div class="card-body">
+                                <h5 class="card-title">${restaurant.name}</h5>
+                                <p class="card-text text-muted">${restaurant.cuisine}</p>
+                                <div class="rating mb-2">
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-half"></i>
+                                    <span class="ms-1">4.5</span>
+                                </div>
+                                <a href="/restaurants/${restaurant.restaurantId}" class="btn btn-outline-primary btn-sm">查看详情</a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += card;
+            });
+        })
+        .catch(error => {
+            console.error('获取餐厅失败:', error);
+        });
+    
+    // 获取最新评价
+    axios.get('/api/reviews/latest')
+        .then(response => {
+            const container = document.getElementById('latest-reviews');
+            container.innerHTML = '';
+            
+            response.data.reviews.forEach(review => {
+                const reviewCard = `
+                    <div class="col-md-6 mb-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <h5 class="card-title">${review.restaurant.name}</h5>
+                                    <div class="rating">
+                                        ${'<i class="bi bi-star-fill"></i>'.repeat(review.rating)}
+                                        ${'<i class="bi bi-star"></i>'.repeat(5 - review.rating)}
+                                    </div>
+                                </div>
+                                <p class="card-text">${review.content}</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">${review.user.name} • ${new Date(review.timestamp).toLocaleDateString()}</small>
+                                    <a href="/restaurants/${review.restaurant.restaurantId}" class="btn btn-sm btn-outline-primary">查看餐厅</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += reviewCard;
+            });
+        })
+        .catch(error => {
+            console.error('获取评价失败:', error);
+        });
+});
+</script>
+{% endblock %}

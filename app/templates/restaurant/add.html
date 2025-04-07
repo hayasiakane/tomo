@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}添加餐厅 - 美食点评网{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body p-5">
+                <h2 class="card-title text-center mb-4">添加餐厅</h2>
+                
+                <form id="add-restaurant-form">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">餐厅名称</label>
+                        <input type="text" class="form-control" id="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="address" class="form-label">地址</label>
+                        <input type="text" class="form-control" id="address" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="cuisine" class="form-label">菜系</label>
+                        <select class="form-select" id="cuisine" required>
+                            <option value="">选择菜系</option>
+                            <option value="中餐">中餐</option>
+                            <option value="西餐">西餐</option>
+                            <option value="日料">日料</option>
+                            <option value="韩餐">韩餐</option>
+                            <option value="火锅">火锅</option>
+                            <option value="烧烤">烧烤</option>
+                            <option value="其他">其他</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">餐厅描述</label>
+                        <textarea class="form-control" id="description" rows="3" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="phone" class="form-label">联系电话</label>
+                        <input type="tel" class="form-control" id="phone">
+                    </div>
+                    <div class="mb-3">
+                        <label for="website" class="form-label">网站</label>
+                        <input type="url" class="form-control" id="website">
+                    </div>
+                    <div class="mb-3">
+                        <label for="opening-hours" class="form-label">营业时间</label>
+                        <input type="text" class="form-control" id="opening-hours" placeholder="例如: 10:00-22:00">
+                    </div>
+                    <div class="mb-3">
+                        <label for="images" class="form-label">餐厅图片</label>
+                        <input type="file" class="form-control" id="images" multiple accept="image/*">
+                        <div class="form-text">最多上传5张图片</div>
+                    </div>
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary">添加餐厅</button>
+                        <button type="button" class="btn btn-outline-secondary" onclick="window.location.href='/restaurants'">取消</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const userId = localStorage.getItem('userId');
+    const token = localStorage.getItem('token');
+    
+    if (!userId || !token) {
+        window.location.href = '/login';
+        return;
+    }
+    
+    // 检查用户是否是商家
+    axios.get(`/api/users/${userId}`)
+        .then(response => {
+            if (response.data.type !== 'business') {
+                window.location.href = '/';
+            }
+        })
+        .catch(error => {
+            console.error('获取用户信息失败:', error);
+            window.location.href = '/';
+        });
+    
+    // 处理表单提交
+    document.getElementById('add-restaurant-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = {
+            name: document.getElementById('name').value,
+            address: document.getElementById('address').value,
+            cuisine: document.getElementById('cuisine').value,
+            description: document.getElementById('description').value,
+            phone: document.getElementById('phone').value,
+            website: document.getElementById('website').value,
+            openingHours: document.getElementById('opening-hours').value
+        };
+        
+        axios.post('/api/restaurants', formData, {
+            headers: {
+                'X-User-ID': userId,
+                'Authorization': `Bearer ${token}`
+            }
+        })
+        .then(response => {
+            alert('餐厅添加成功！');
+            window.location.href = `/restaurants/${response.data.restaurantId}`;
+        })
+        .catch(error => {
+            console.error('添加餐厅失败:', error);
+            alert('添加餐厅失败: ' + (error.response?.data?.error || '请稍后再试'));
+        });
+    });
+});
+</script>
+{% endblock %}

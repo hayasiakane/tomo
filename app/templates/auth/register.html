@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}注册 - 美食点评网{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body p-5">
+                <h2 class="card-title text-center mb-4">注册账号</h2>
+                
+                <form id="register-form">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">姓名</label>
+                        <input type="text" class="form-control" id="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">电子邮箱</label>
+                        <input type="email" class="form-control" id="email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">密码</label>
+                        <input type="password" class="form-control" id="password" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="confirm-password" class="form-label">确认密码</label>
+                        <input type="password" class="form-control" id="confirm-password" required>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="business-account">
+                            <label class="form-check-label" for="business-account">
+                                我是商家，想要添加我的餐厅
+                            </label>
+                        </div>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">注册</button>
+                    </div>
+                </form>
+                
+                <div class="text-center mt-3">
+                    <p>已有账号？<a href="/login">立即登录</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 检查是否已登录
+    if (localStorage.getItem('token')) {
+        window.location.href = '/';
+    }
+    
+    // 处理注册表单提交
+    document.getElementById('register-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const name = document.getElementById('name').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirm-password').value;
+        const isBusiness = document.getElementById('business-account').checked;
+        
+        // 前端验证
+        if (!name || !email || !password) {
+            alert('请填写所有必填字段');
+            return;
+        }
+        
+        if (password !== confirmPassword) {
+            alert('两次输入的密码不一致');
+            return;
+        }
+        
+        try {
+            const response = await axios.post('/api/users/register', {
+                name: name,
+                email: email,
+                password: password,
+                type: isBusiness ? 'business' : 'regular'
+            }, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                }
+            });
+            
+            alert('注册成功！请登录');
+            window.location.href = '/login';
+        } catch (error) {
+            console.error('注册失败:', error);
+            const errorMsg = error.response?.data?.error || 
+                           error.response?.data?.message || 
+                           '注册失败，请稍后再试';
+            alert(errorMsg);
+        }
+    });
+});
+</script>
+{% endblock %}

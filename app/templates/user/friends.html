@@ -1,0 +1,232 @@
+{% extends "base.html" %}
+
+{% block title %}My Friends - Food Review App{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8">
+            <h2>My Friends</h2>
+            
+            <!-- Friend Search Form -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Add New Friends</h5>
+                    <form id="search-friend-form">
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="friend-search-input" placeholder="Search by name or email">
+                            <button class="btn btn-primary" type="submit">Search</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Search Results (initially hidden) -->
+            <div class="card mb-4 d-none" id="search-results">
+                <div class="card-body">
+                    <h5 class="card-title">Search Results</h5>
+                    <div id="search-results-list"></div>
+                </div>
+            </div>
+
+            <!-- Current Friends List -->
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Friends List</h5>
+                    
+                    {% if friends %}
+                        <div class="list-group">
+                            {% for friend in friends %}
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6>{{ friend.name }}</h6>
+                                    <small class="text-muted">{{ friend.email }}</small>
+                                </div>
+                                <div>
+                                    <a href="/user/{{ friend.userId }}/reviews" class="btn btn-sm btn-outline-primary me-2">
+                                        View Reviews
+                                    </a>
+                                    <button class="btn btn-sm btn-outline-danger remove-friend" data-user-id="{{ friend.userId }}">
+                                        Remove
+                                    </button>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            You don't have any friends yet. Search for users to add them as friends!
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <!-- Friend Recommendations -->
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Suggestions</h5>
+                    <p class="text-muted">People you may know</p>
+                    
+                    <div id="friend-recommendations">
+                        <div class="text-center py-3">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const userId = localStorage.getItem('userId');
+    const token = localStorage.getItem('token');
+
+    // Load friend recommendations
+    function loadRecommendations() {
+        fetch('/api/users/recommendations', {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'X-User-ID': userId
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            const container = document.getElementById('friend-recommendations');
+            
+            if (data.recommendations && data.recommendations.length > 0) {
+                container.innerHTML = data.recommendations.map(user => `
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <h6>${user.name}</h6>
+                            <small class="text-muted">${user.email}</small>
+                        </div>
+                        <button class="btn btn-sm btn-outline-primary add-friend" 
+                                data-user-id="${user.userId}">
+                            Add
+                        </button>
+                    </div>
+                `).join('');
+            } else {
+                container.innerHTML = '<p class="text-muted">No recommendations available</p>';
+            }
+        })
+        .catch(error => {
+            console.error('Error loading recommendations:', error);
+        });
+    }
+
+    // Search for friends
+    document.getElementById('search-friend-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const query = document.getElementById('friend-search-input').value.trim();
+        
+        if (query) {
+            fetch(`/api/users/search?q=${encodeURIComponent(query)}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'X-User-ID': userId
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                const resultsContainer = document.getElementById('search-results-list');
+                const resultsPanel = document.getElementById('search-results');
+                
+                if (data.users && data.users.length > 0) {
+                    resultsContainer.innerHTML = data.users.map(user => `
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div>
+                                <h6>${user.name}</h6>
+                                <small class="text-muted">${user.email}</small>
+                            </div>
+                            <button class="btn btn-sm btn-outline-primary add-friend" 
+                                    data-user-id="${user.userId}">
+                                Add Friend
+                            </button>
+                        </div>
+                    `).join('');
+                    resultsPanel.classList.remove('d-none');
+                } else {
+                    resultsContainer.innerHTML = '<p class="text-muted">No users found</p>';
+                    resultsPanel.classList.remove('d-none');
+                }
+            })
+            .catch(error => {
+                console.error('Search failed:', error);
+            });
+        }
+    });
+
+    // Add friend
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('add-friend')) {
+            const friendId = e.target.getAttribute('data-user-id');
+            
+            fetch(`/api/users/${userId}/friends`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                    'X-User-ID': userId
+                },
+                body: JSON.stringify({ friendId: friendId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Friend added successfully!');
+                    window.location.reload();
+                } else {
+                    alert(data.error || 'Failed to add friend');
+                }
+            })
+            .catch(error => {
+                console.error('Error adding friend:', error);
+                alert('Failed to add friend');
+            });
+        }
+    });
+
+    // Remove friend
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('remove-friend')) {
+            if (confirm('Are you sure you want to remove this friend?')) {
+                const friendId = e.target.getAttribute('data-user-id');
+                
+                fetch(`/api/users/${userId}/friends/${friendId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'X-User-ID': userId
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Friend removed successfully!');
+                        window.location.reload();
+                    } else {
+                        alert(data.error || 'Failed to remove friend');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error removing friend:', error);
+                    alert('Failed to remove friend');
+                });
+            }
+        }
+    });
+
+    // Initial load
+    loadRecommendations();
+});
+</script>
+{% endblock %}
