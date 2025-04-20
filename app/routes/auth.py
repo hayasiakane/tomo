@@ -66,28 +66,8 @@ def api_register():
         if result[0] > 0:
             return jsonify({"error": "Email already exists"}), 400
         
-        # 2. 创建新用户
-        user_id = str(uuid.uuid4())
-        hashed_pw = data['password']
-        
-        create_query = """
-        g.addV('user')
-         .property('user_id', user_id)
-         .property('name', name)
-         .property('email', email)
-         .property('password', password)
-         .property('type', type)
-         .property('created_at', created_at)
-        """
-        
-        gremlin_client.submit(create_query, {
-            'user_id': user_id,
-            'name': data['name'],
-            'email': data['email'],
-            'password': hashed_pw,
-            'type': data.get('type', 'regular'),
-            'created_at': datetime.utcnow().isoformat() + 'Z'
-        }).all().result()
+        User.register(data['name'], data['email'], hashed_pw, data.get('type', 'regular'))
+        # 执行创建用户的Gremlin查询
         
         return jsonify({
             "message": "Registration successful",

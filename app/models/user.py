@@ -8,16 +8,24 @@ import os
 import datetime
 class User:
     @staticmethod
-    def register(name, email, password, user_type="regular"):
+    def register(name, email, password, user_type="u"): # 默认用户类型为普通用户
         """注册新用户"""
         try:
-            # 检查邮箱是否已存在
-            existing = db.g.V().has('user', 'email', email).hasNext()
-            if existing:
-                return None, "Email already registered"
+            # 初始化Gremlin客户端（根据你的配置调整）
+            gremlin_client = client.Client('ws://localhost:8182/gremlin', 'g')
             
+            # 1. 检查邮箱是否已存在（使用参数化查询防止注入）
+            email_check = "g.V().has('user', 'email', email).count()"
+            result = gremlin_client.submit(email_check, {'email': email}).all().result()
+            
+            if result[0] > 0:
+                return None, "该邮箱已被注册"
+            
+            # 2. 创建新用户（密码加密）
+            user_id = str(uuid.uuid4())  # 生成唯一ID
+            hashed_pw = generate_password_hash(password)
+
             # 创建用户顶点
-            user_id = str(uuid.uuid4())
             db.g.addV('user') \
               .property('userId', user_id) \
               .property('name', name) \
@@ -30,6 +38,8 @@ class User:
             return user_id, None
         except Exception as e:
             return None, str(e)
+        finally:
+        gremlin_client.close()  # 关闭连接
 
     @classmethod
     def authenticate(cls, email, password):
@@ -74,6 +84,40 @@ class User:
         """根据ID获取用户信息"""
         try:
             user = db.g.V().has('user', 'userId', user_id) \
+                        .valueMap(True).next()
+            
+            return {
+                'userId': user['userId'][0],
+                'name': user['name'][0],
+                'email': user['email'][0],
+                'type': user['type'][0],
+                'createdAt': user['createdAt'][0]
+            }, None
+        except Exception as e:
+            return None, "User not found"
+    
+    @staticmethod
+    def get_by_email(user_email):
+        """根据ID获取用户信息"""
+        try:
+            user = db.g.V().has('user', 'email', user_email) \
+                        .valueMap(True).next()
+            
+            return {
+                'userId': user['userId'][0],
+                'name': user['name'][0],
+                'email': user['email'][0],
+                'type': user['type'][0],
+                'createdAt': user['createdAt'][0]
+            }, None
+        except Exception as e:
+            return None, "User not found"
+    
+    @staticmethod
+    def get_by_name(user_name):
+        """根据ID获取用户信息"""
+        try:
+            user = db.g.V().has('user', 'name', user_name) \
                         .valueMap(True).next()
             
             return {
