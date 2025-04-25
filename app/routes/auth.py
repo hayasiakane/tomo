@@ -1,3 +1,12 @@
+import sys
+import os
+
+# 获取 app 目录的父目录
+parent_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# 将父目录添加到 sys.path
+sys.path.append(parent_dir)
+print(f"Parent directory: {parent_dir}")
+
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from gremlin_python.driver import client  # 添加这行
 from werkzeug.security import generate_password_hash,check_password_hash  # 密码加密需要
@@ -49,7 +58,7 @@ def api_register():
         return jsonify({"error": "Unsupported Media Type: Content-Type must be application/json"}), 415
     
     data = request.get_json()
-    
+
     # 必填字段验证
     required_fields = ['name', 'email', 'password']
     if not all(field in data for field in required_fields):
@@ -59,20 +68,20 @@ def api_register():
         # 初始化Gremlin连接
         gremlin_client = client.Client('ws://localhost:8182/gremlin', 'g')
         
-        # 1. 检查邮箱是否已存在
-        email_check = "g.V().has('user', 'email', email).count()"
-        result = gremlin_client.submit(email_check, {'email': data['email']}).all().result()
-        hashed_pw = generate_password_hash(data['password'])
-        user_id = str(uuid.uuid4())  # 生成唯一ID
-        if result[0] > 0:
-            return jsonify({"error": "Email already exists"}), 400
         
-        User.register(data['name'], data['email'], hashed_pw, data.get('type', 'regular'))
+        # #hashed_pw = generate_password_hash(data['password'])
+        # #user_id = str(uuid.uuid4())  # 生成唯一ID
+        # if result[0] > 0:
+        #     return jsonify({"error": "Email already exists"}), 400
+        
+        User.register(data['name'], data['email'], data['password'], data.get('type', 'regular'))
         # 执行创建用户的Gremlin查询
-        
+        user_data,error = User.get_by_email(data['email'])
+        if error:
+            return jsonify({"error": "User creation failed"}), 500
         return jsonify({
             "message": "Registration successful",
-            "user_id": user_id
+            "user_id": user_data['userId'],
         }), 201
         
     except Exception as e:

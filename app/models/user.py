@@ -3,23 +3,21 @@ import uuid
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from gremlin_python.driver import client  # 添加这行
 from werkzeug.security import generate_password_hash  # 密码加密需要
-from werkzeug.security import check_password_hash
+from werkzeug.security import check_password_hash   # 密码验证需要
 import os
 import datetime
 class User:
     @staticmethod
-    def register(name, email, password, user_type="u"): # 默认用户类型为普通用户
+    def register(name, email, password, user_type="regular"): # 默认用户类型为普通用户
         """注册新用户"""
         try:
             # 初始化Gremlin客户端（根据你的配置调整）
-            gremlin_client = client.Client('ws://localhost:8182/gremlin', 'g')
+            #gremlin_client = client.Client('ws://localhost:8182/gremlin', 'g')
             
-            # 1. 检查邮箱是否已存在（使用参数化查询防止注入）
-            email_check = "g.V().has('user', 'email', email).count()"
-            result = gremlin_client.submit(email_check, {'email': email}).all().result()
-            
-            if result[0] > 0:
-                return None, "该邮箱已被注册"
+            # 1. 检查邮箱是否已存在
+            auth_data,error = User.get_by_email(email)
+            if not error:
+                return None,"邮箱已存在"
             
             # 2. 创建新用户（密码加密）
             user_id = str(uuid.uuid4())  # 生成唯一ID
@@ -30,16 +28,16 @@ class User:
               .property('userId', user_id) \
               .property('name', name) \
               .property('email', email) \
-              .property('password', password) \
+              .property('password', hashed_pw) \
               .property('type', user_type) \
-              .property('createdAt', datetime.now().isoformat()) \
+              .property('createdAt', datetime.datetime.now().isoformat()) \
               .next()
             
             return user_id, None
         except Exception as e:
             return None, str(e)
         finally:
-            gremlin_client.close()  # 关闭连接
+            db.close()  # 关闭连接
 
     @classmethod
     def authenticate(cls, email, password):
@@ -67,7 +65,7 @@ class User:
                 return None, "用户不存在"
             
             # 验证密码
-            if result[0]['password']!=password:#not check_password_hash(result[0]['password'], password):
+            if not check_password_hash(result[0]['password'],password):#not check_password_hash(result[0]['password'], password):
                 return None, "密码错误"
            
             return {
