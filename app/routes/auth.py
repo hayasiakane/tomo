@@ -62,7 +62,8 @@ def api_register():
         # 1. 检查邮箱是否已存在
         email_check = "g.V().has('user', 'email', email).count()"
         result = gremlin_client.submit(email_check, {'email': data['email']}).all().result()
-        
+        hashed_pw = generate_password_hash(data['password'])
+        user_id = str(uuid.uuid4())  # 生成唯一ID
         if result[0] > 0:
             return jsonify({"error": "Email already exists"}), 400
         

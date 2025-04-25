@@ -1,5 +1,5 @@
 docker-compose.yml
 Dockerfile.gremlin
 Dockerfile
-gremlin-server.yaml
 tinkergraph-empty.properties
+login.bat

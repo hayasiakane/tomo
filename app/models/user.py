@@ -39,7 +39,7 @@ class User:
         except Exception as e:
             return None, str(e)
         finally:
-        gremlin_client.close()  # 关闭连接
+            gremlin_client.close()  # 关闭连接
 
     @classmethod
     def authenticate(cls, email, password):
