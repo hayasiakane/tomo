@@ -1,9 +1,8 @@
-call activate venv
-cd  apache-tinkerpop-gremlin-server-3.4.11-bin
-cd apache-tinkerpop-gremlin-server-3.4.11
-cd bin
-start gremlin-server.bat
-cd ..
-cd ..
+pushd venv\Scripts
+call activate.bat
+popd
 pip install -r requirements.txt
+pushd  apache-tinkerpop-gremlin-server-3.4.11\bin
+start gremlin-server.bat
+popd
 python run.py

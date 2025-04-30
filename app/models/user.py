@@ -127,6 +127,23 @@ class User:
             }, None
         except Exception as e:
             return None, "User not found"
+        
+    @staticmethod
+    def get(attribute='userId', value=None):
+        """根据属性获取用户信息"""
+        try:
+            user = db.g.V().has('user',attribute, value) \
+                        .valueMap(True).next()
+            
+            return {
+                'userId': user['userId'][0],
+                'name': user['name'][0],
+                'email': user['email'][0],
+                'type': user['type'][0],
+                'createdAt': user['createdAt'][0]
+            }, None
+        except Exception as e:
+            return None, "User not found"
 
     @staticmethod
     def add_friend(user_id, friend_id):

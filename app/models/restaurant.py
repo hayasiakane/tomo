@@ -68,6 +68,39 @@ class Restaurant:
         except Exception as e:
             return None, "Restaurant not found"
 
+    @staticmethod  
+    def get(attribut='restaurantId', value=None):
+        """根据属性获取餐厅信息"""
+        try:
+            restaurant = db.g.V().has('restaurant', attribut, value) \
+                               .valueMap(True).next()
+            
+            # 获取所有者信息
+            owner = db.g.V().has('restaurant', attribut, attribut) \
+                          .in_('owns') \
+                          .valueMap('name', 'userId').next()
+            
+            # 获取评价数量
+            review_count = db.g.V().has('restaurant', attribut, value) \
+                                 .in_('has_review') \
+                                 .count().next()
+            
+            return {
+                'restaurantId': restaurant['restaurantId'][0],
+                'name': restaurant['name'][0],
+                'address': restaurant['address'][0],
+                'cuisine': restaurant.get('cuisine', [''])[0],
+                'description': restaurant.get('description', [''])[0],
+                'createdAt': restaurant['createdAt'][0],
+                'owner': {
+                    'userId': owner['userId'][0],
+                    'name': owner['name'][0]
+                },
+                'reviewCount': review_count
+            }, None
+        except Exception as e:
+            return None, "Restaurant not found"
+
     @staticmethod
     def get_all(page=1, per_page=10, search=None, cuisine=None):
         """获取餐厅列表"""
