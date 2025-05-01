@@ -2,16 +2,16 @@ from . import db
 from gremlin_python.process.traversal import __ 
 class Friendship:
     @staticmethod
-    def get_friend_recommendations(user_id, limit=5):
+    def get_friend_recommendations(attribute='userId', value=None,limit=5):
         """获取好友推荐（基于好友的好友）"""
         try:
             # 获取好友的好友（排除已经是好友的和自己）
-            recommendations = db.g.V().has('user', 'userId', user_id) \
+            recommendations = db.g.V().has('user', attribute, value) \
                                    .both('is_friend') \
                                    .both('is_friend') \
-                                   .where(__.neq(__.V().has('user', 'userId', user_id))) \
+                                   .where(__.neq(__.V().has('user', attribute, value))) \
                                    .where(__.not_(__.in_('is_friend') \
-                                           .has('user', 'userId', user_id))) \
+                                           .has('user', attribute, value))) \
                                    .dedup() \
                                    .limit(limit) \
                                    .valueMap('name', 'email', 'userId') \

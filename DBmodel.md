@@ -233,3 +233,44 @@
         except Exception as e:
             return None, str(e)
         ```
+
+### Friendship
+1. 导入类
+`from app.models.friendship import Friendship`
+
+2. 获取好友推荐：get_friend_recommendations(attribute='userId', value=None,limit=5)
+    1. 语句
+    `Friendship.et_friend_recommendations(attribute='userId', value=None,limit=5)`
+
+    2.返回：推荐好友信息列表
+    ```Python
+    return [{
+                'userId': r['userId'][0],
+                'name': r['name'][0],
+                'email': r['email'][0]
+            } for r in recommendations], None
+        except Exception as e:
+            return None, str(e)
+    ```
+
+3. 获取共同好友：get_common_friends(user_id, friend_id)
+    1. 语句
+    `Friendship.get_common_friends(user_id,friend_id)`
+
+    2. 返回：沟通好友信息列表
+    ```Python
+    return [{
+                'userId': f['userId'][0],
+                'name': f['name'][0],
+                'email': f['email'][0]
+            } for f in common_friends], None
+        except Exception as e:
+            return None, str(e)
+    ```
+
+### review
+1. 属性
+    1. reviewId:评论id，自动建立，不需要管
+    2. content:评论内容
+    3. rating:评分
+    
