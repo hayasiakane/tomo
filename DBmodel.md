@@ -36,7 +36,25 @@
             }(json), None(状态码)
         ```
     
-    4. ID获取用户信息：get_by_id
+    4. 根据属性查询用户：get(attribute='userId', value=None)
+        <br>下面也提供快捷的具体属性的查询</br>
+        1.语句
+        `User.get('name',user_name)`
+
+        2. 作用
+            1. 获取用户信息
+        3. 返回内容
+        ```
+            return {
+                'userId': user['userId'][0],
+                'name': user['name'][0],
+                'email': user['email'][0],
+                'type': user['type'][0],
+                'createdAt': user['createdAt'][0]
+            }(包含所有用户内容的json), None
+        ```
+
+    5. ID获取用户信息：get_by_id
         1. 语句：
             `User.get_by_id(user_id)`
         2. 作用
@@ -52,24 +70,24 @@
             }(包含所有用户内容的json), None
         ```
     
-    5. email获取用户信息：get_by_email
+    6. email获取用户信息：get_by_email
         1. 语句：
             `User.get_by_email(user_email)`
         2. 其余同上
 
-    6. name获取用户信息：get_by_name
+    7. name获取用户信息：get_by_name
         1. 语句：
             `User.get_by_name(user_name)`
         2. 其余同上
     
-    7. 添加好友： add_friend:
+    8. 添加好友： add_friend:
         1. 语句：
             `User.add(user_id,friend_id)`
         2. 作用
             1. 添加好友
         3. 返回内容:布尔值
     
-    8. 获取好友列表：get_friends
+    9. 获取好友列表：get_friends
         1. 语句：
             `User.get_friends(user_id)`
         2. 作用
@@ -83,25 +101,25 @@
             } for f in friends], None
             ```
     
-    9. 移除好友：remove_friend
+    10. 移除好友：remove_friend
         1. 语句
             `User.remove_friend(user_id,friend_id)`
         2. 作用
             1. 删除好友
         3. 返回内容：布尔值
     
-    10. 根据属性查询用户：get(attribute='userId', value=None)
-     1.语句
-     `User.get('name',user_name)`
-
-     2. 其余与最上面的获取函数一致
+    11. 删除用户节点：delete (默认用userId属性检索删除)
+        1. 语句
+            `User.delete(attribute, value)`
+        2. 返回内容：布尔值
+    
 
 ### restaurant
 1. 属性
     1. restaurantId (餐厅id)  <br>自动添加，不需要管</br>
     2. name (餐厅名字)
     3. address (餐厅地址)
-    4. cuisine (菜单，先创建json对象再传递进去)
+    4. cuisine (菜系)
     5. description (餐厅描述)
     6. createdAt (添加时间) <br>自动添加，不需要管</br>
 
@@ -157,3 +175,61 @@
         `Restaurant.get('name',name)`
 
         2.返回与上面一致
+    
+    5. 返回餐厅列表：get_all( search=None, cuisine=None)
+        1. 语法
+            ```Python
+            data,error=Restaurant.get_all()
+            if error:
+                print("Error:", error)
+            else:
+                print("Restaurant found:", data)
+            ```
+        
+        2. 作用：返回符合检索要求的：search参数是要求的餐厅名字，cuisine是要求的菜系
+            默认无要求，返回数据库里所有的餐厅信息
+        
+        3. 返回：
+        ```Python
+        return {
+                'restaurants': [{
+                    'restaurantId': r['restaurantId'][0],
+                    'name': r['name'][0],
+                    'address': r['address'][0],
+                    'cuisine': r.get('cuisine', [''])[0]
+                } for r in restaurants],
+                'total': total,
+                # 'page': page,
+                # 'per_page': per_page
+            }, None
+        except Exception as e:  #错误的话返回None类型及错误
+            return None, str(e)
+        ```
+    
+    6. 删除餐厅顶点：delete #2025.5.1。未测试 
+        1. 语句
+        `Restaurant.delete(attribute,value)`
+
+        2. 作用：
+                1. 根据属性要求，删除餐厅顶点，默认用id删除
+                2. 同时也会删除与餐厅相关联的评论和回复
+
+        3。返回：布尔值
+    
+    7. 查找用户拥有的餐厅： get_by_owner(attribute='userId',value=None)
+        1. 语句
+        `Restaurant. get_by_owner(attribute,value)`
+
+        2. 作用：查找与该用户相关联的所有餐厅顶点
+
+        3. 返回
+        ```
+        return [{
+                'restaurantId': r['restaurantId'][0],
+                'name': r['name'][0],
+                'address': r['address'][0],
+                'cuisine': r.get('cuisine', [''])[0]
+            } for r in restaurants], None
+        except Exception as e:
+            return None, str(e)
+        ```

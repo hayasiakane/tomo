@@ -1,5 +1,5 @@
 from . import db
-
+from gremlin_python.process.traversal import __ 
 class Friendship:
     @staticmethod
     def get_friend_recommendations(user_id, limit=5):

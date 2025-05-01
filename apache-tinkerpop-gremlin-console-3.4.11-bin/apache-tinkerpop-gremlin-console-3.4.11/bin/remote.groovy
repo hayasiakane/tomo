@@ -1,2 +1,2 @@
-:remote connect tinkerpop.server conf/remote.yaml
+:remote connect tinkerpop.server conf/remote.yaml session
 :remote console

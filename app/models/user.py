@@ -6,6 +6,7 @@ from werkzeug.security import generate_password_hash  # 密码加密需要
 from werkzeug.security import check_password_hash   # 密码验证需要
 import os
 import datetime
+#from gremlin_python.process.traversal import __ 
 class User:
     @staticmethod
     def register(name, email, password, user_type="regular"): # 默认用户类型为普通用户
@@ -208,31 +209,51 @@ class User:
             return True, None
         except Exception as e:
             return False, str(e)
+        finally:
+            db.close()
+        
+    @staticmethod
+    def delete(attribute='userId', value=None):
+        """根据属性删除用户信息"""
+        try:
+            # 检查顶点是否存在
+            if not db.g.V().has('user', attribute, value).hasNext():
+                return False  # 顶点不存在，返回 False
 
-@classmethod
-def get_by_id(cls, user_id):
-    try:
-        gremlin_client = client.Client('ws://localhost:8182/gremlin', 'g')
+            # 删除顶点
+            db.g.V().has('user', attribute, value).drop().next()
+            return True  # 删除成功
+        except Exception as e:
+            return  str(e)
+        finally:
+            db.close()
+
+# @classmethod
+# def get_by_id(cls, user_id):
+#     try:
+#         gremlin_client = client.Client('ws://localhost:8182/gremlin', 'g')
         
-        query = """
-        g.V()
-         .has('user', 'user_id', user_id)
-         .project('user_id', 'name', 'email', 'type', 'created_at', 'last_login')
-         .by(values('user_id'))
-         .by(values('name'))
-         .by(values('email'))
-         .by(values('type'))
-         .by(values('created_at'))
-         .by(coalesce(values('last_login'), constant(null)))
-        """
-        result = gremlin_client.submit(query, {'user_id': user_id}).all().result()
+#         query = """
+#         g.V()
+#          .has('user', 'user_id', user_id)
+#          .project('user_id', 'name', 'email', 'type', 'created_at', 'last_login')
+#          .by(values('user_id'))
+#          .by(values('name'))
+#          .by(values('email'))
+#          .by(values('type'))
+#          .by(values('created_at'))
+#          .by(coalesce(values('last_login'), constant(null)))
+#         """
+#         result = gremlin_client.submit(query, {'user_id': user_id}).all().result()
         
-        if not result:
-            return None
+#         if not result:
+#             return None
             
-        return result[0]
+#         return result[0]
         
-    except Exception as e:
-        raise e
-    finally:
-        gremlin_client.close()
+#     except Exception as e:
+#         raise e
+#     finally:
+#         gremlin_client.close()
+    
+

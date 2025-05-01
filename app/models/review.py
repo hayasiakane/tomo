@@ -1,7 +1,7 @@
 from app.models import db
 import uuid
 from datetime import datetime
-
+from gremlin_python.process.traversal import __ 
 class Review:
     @staticmethod
     def create(user_id, restaurant_id, content, rating):
@@ -23,13 +23,13 @@ class Review:
             # 创建用户->评价关系
             db.g.V().has('user', 'userId', user_id) \
                    .addE('wrote') \
-                   .to(__.V().has('review', 'reviewId', review_id)) \
+                   .to( db.g.V().has('review', 'reviewId', review_id)) \
                    .next()
             
             # 创建餐厅<-评价关系
             db.g.V().has('restaurant', 'restaurantId', restaurant_id) \
                    .addE('has_review') \
-                   .to(__.V().has('review', 'reviewId', review_id)) \
+                   .to( db.g.V().has('review', 'reviewId', review_id)) \
                    .next()
             
             return review_id, None

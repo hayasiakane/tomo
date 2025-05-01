@@ -1,7 +1,8 @@
 from . import db
 import uuid
 from datetime import datetime
-
+#from gremlin_python.process.traversal import __ 
+from gremlin_python.process.graph_traversal import __
 class Restaurant:
     @staticmethod
     def create(owner_id, name, address, cuisine="", description=""):
@@ -25,15 +26,22 @@ class Restaurant:
               .property('createdAt', datetime.now().isoformat()) \
               .next()
             
-            # 创建拥有关系
-            db.g.V().has('user', 'userId', owner_id) \
-                   .addE('owns') \
-                   .to(__.V().has('restaurant', 'restaurantId', restaurant_id)) \
-                   .next()
+            #创建拥有关系
+            
+            db.g.addE('owns') \
+                   .from_( __.V().has('user', 'userId', str(owner_id))) \
+                     .to( __.V().has('restaurant', 'restaurantId', restaurant_id)).next() \
+
+            # db.g.V().has('user', 'userId', owner_id) \
+            #        .addE('owns') \
+            #        .to( __.V().has('restaurant', 'restaurantId', restaurant_id)) \
+            #        .next()
             
             return restaurant_id, None
         except Exception as e:
             return None, str(e)
+        finally:
+            db.close()  # 关闭连接
 
     @staticmethod
     def get_by_id(restaurant_id):
@@ -67,6 +75,8 @@ class Restaurant:
             }, None
         except Exception as e:
             return None, "Restaurant not found"
+        finally:
+            db.close()  # 关闭连接
 
     @staticmethod  
     def get(attribut='restaurantId', value=None):
@@ -76,15 +86,15 @@ class Restaurant:
                                .valueMap(True).next()
             
             # 获取所有者信息
-            owner = db.g.V().has('restaurant', attribut, attribut) \
+            owner = db.g.V().has('restaurant', attribut, value) \
                           .in_('owns') \
                           .valueMap('name', 'userId').next()
             
-            # 获取评价数量
-            review_count = db.g.V().has('restaurant', attribut, value) \
-                                 .in_('has_review') \
-                                 .count().next()
-            
+            # # 获取评价数量
+            # review_count = db.g.V().has('restaurant', attribut, value) \
+            #                      .in_('has_review') \
+            #                      .count().next()
+            # 返回餐厅信息   
             return {
                 'restaurantId': restaurant['restaurantId'][0],
                 'name': restaurant['name'][0],
@@ -96,33 +106,42 @@ class Restaurant:
                     'userId': owner['userId'][0],
                     'name': owner['name'][0]
                 },
-                'reviewCount': review_count
+                #'reviewCount': review_count
             }, None
         except Exception as e:
-            return None, "Restaurant not found"
+            return None, str(e)
+        finally:
+            db.close()  # 关闭连接
+        
 
     @staticmethod
-    def get_all(page=1, per_page=10, search=None, cuisine=None):
+    def get_all( search=None, cuisine=None): #page=1, per_page=10,
         """获取餐厅列表"""
         try:
-            # 基本查询
-            traversal = db.g.V().hasLabel('restaurant')
+            # 构建基础查询（用于分页数据）
+            data_traversal = db.g.V().hasLabel('restaurant')
             
             # 应用搜索条件
             if search:
-                traversal = traversal.has('name', search)
+                data_traversal = data_traversal.has('name', search)
             
             # 应用菜系过滤
             if cuisine:
-                traversal = traversal.has('cuisine', cuisine)
+                data_traversal = data_traversal.has('cuisine', cuisine)
             
-            # 分页
-            restaurants = traversal.range((page-1)*per_page, page*per_page) \
-                                 .valueMap('name', 'address', 'cuisine', 'restaurantId') \
-                                 .toList()
+            # 执行分页查询
+            restaurants = data_traversal \
+                                    .valueMap('name', 'address', 'cuisine', 'restaurantId') \
+                                    .toList()
+            #.range((page-1)*per_page, page*per_page)
+            # 重新构建查询计算总数（不能复用 data_traversal）
+            count_traversal = db.g.V().hasLabel('restaurant')
+            if search:
+                count_traversal = count_traversal.has('name', search)
+            if cuisine:
+                count_traversal = count_traversal.has('cuisine', cuisine)
             
-            # 获取总数
-            total = traversal.count().next()
+            total = count_traversal.count().next()
             
             return {
                 'restaurants': [{
@@ -132,30 +151,32 @@ class Restaurant:
                     'cuisine': r.get('cuisine', [''])[0]
                 } for r in restaurants],
                 'total': total,
-                'page': page,
-                'per_page': per_page
+                # 'page': page,
+                # 'per_page': per_page
             }, None
         except Exception as e:
             return None, str(e)
+        finally:
+            db.close()
 
     @staticmethod
-    def delete(restaurant_id):
+    def delete(attribute='restaurantId',value=None):
         """删除餐厅"""
         try:
             # 删除相关评价和回复
-            db.g.V().has('restaurant', 'restaurantId', restaurant_id) \
+            db.g.V().has('restaurant', attribute, value) \
                    .in_('has_review') \
                    .in_('has_reply') \
                    .drop() \
                    .iterate()
             
-            db.g.V().has('restaurant', 'restaurantId', restaurant_id) \
+            db.g.V().has('restaurant', attribute,value) \
                    .in_('has_review') \
                    .drop() \
                    .iterate()
             
             # 删除餐厅顶点
-            db.g.V().has('restaurant', 'restaurantId', restaurant_id) \
+            db.g.V().has('restaurant', attribute,value) \
                    .drop() \
                    .iterate()
             
@@ -164,10 +185,10 @@ class Restaurant:
             return False, str(e)
 
     @staticmethod
-    def get_by_owner(owner_id):
+    def get_by_owner(attribute='userId',value=None):
         """获取用户拥有的餐厅"""
         try:
-            restaurants = db.g.V().has('user', 'userId', owner_id) \
+            restaurants = db.g.V().has('user', attribute, value) \
                                 .out('owns') \
                                 .valueMap('name', 'address', 'cuisine', 'restaurantId') \
                                 .toList()
