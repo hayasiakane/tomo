@@ -80,7 +80,7 @@
             `User.get_by_name(user_name)`
         2. 其余同上
     
-    8. 添加好友： add_friend:
+    8. 添加好友： add_friend:(默认单向好友关系，需要开发双向请联系我)
         1. 语句：
             `User.add(user_id,friend_id)`
         2. 作用
@@ -214,7 +214,7 @@
                 1. 根据属性要求，删除餐厅顶点，默认用id删除
                 2. 同时也会删除与餐厅相关联的评论和回复
 
-        3。返回：布尔值
+        3. 返回：布尔值
     
     7. 查找用户拥有的餐厅： get_by_owner(attribute='userId',value=None)
         1. 语句
@@ -273,4 +273,80 @@
     1. reviewId:评论id，自动建立，不需要管
     2. content:评论内容
     3. rating:评分
+    4. createdAt:创建时间，自动获取，不需要管
+
+2. 函数
+    1. 导入类
+    `from app.models.review import Review`
+
+    2. 创建评论：create(user_id, restaurant_id, content, rating):
+        1. 语句
+        `Review.create(user_id, restaurant_id, content, rating)`
+
+        2. 返回：评论id及错误信息
+        ```Python
+        return review_id, None
+        except Exception as e:
+            return None, str(e)
+        ```
     
+    3. 获取餐厅的评论：get_by_restaurant(restaurant_id, sort='latest')
+        1. 语句
+        `Review.get_by_restaurant(restaurant_id, sort='latest')`
+
+        2. 返回：评论列表及回复
+        ```
+        return [{
+                'reviewId': r['review']['reviewId'][0],
+                'content': r['review']['content'][0],
+                'rating': r['review']['rating'][0],
+                'createdAt': r['review']['createdAt'][0],
+                'user': {
+                    'userId': r['user']['userId'][0],
+                    'name': r['user']['name'][0]
+                },
+                'reply': {
+                    'content': r['reply'][0]['content'][0],
+                    'createdAt': r['reply'][0]['createdAt'][0]
+                } if r['reply'] else None
+            } for r in reviews], None
+        except Exception as e:
+            return None, str(e)
+        ```
+    
+    4. 获取用户评论：get_by_user(user_id):
+        1. 语句
+        `Review.get_by_user(user_id)`
+
+        2. 返回：用户评论列表
+        ```Python
+        return [{
+                'reviewId': r['review']['reviewId'][0],
+                'content': r['review']['content'][0],
+                'rating': r['review']['rating'][0],
+                'createdAt': r['review']['createdAt'][0],
+                'restaurant': {
+                    'restaurantId': r['restaurant']['restaurantId'][0],
+                    'name': r['restaurant']['name'][0]
+                }
+            } for r in reviews], None
+        except Exception as e:
+            return None, str(e)
+        ```
+    
+    5. 添加回复：add_reply(review_id, owner_id, content)
+        1. 语句
+        `Review.add_reply(review_id, owner_id, content)`
+
+        2. 返回：回复id
+        ```
+            return reply_id, None
+        except Exception as e:
+            return None, str(e)
+        ```
+
+    6. 删除评论：delete(review_id)
+        1. 语句
+        `Review.delete(review_id)`
+
+        2. 返回：布尔值

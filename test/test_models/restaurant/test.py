@@ -10,9 +10,10 @@ from app.models import db
 from app.models.user import User
 from app.models.restaurant import Restaurant
 from gremlin_python.process.graph_traversal import __
+from app.models.review import Review
 #测试注册用户
 
-create=0
+create=1
 
 test_user_name=['test_user','test_user1','test_user2','test_user3']
 test_user_email=['123@123.com','124@124.com','125@125.com','126@126.com']
@@ -47,11 +48,11 @@ def search_user_by_email(email):
 
 if create:
     id=test_reg()
-    id,error=User.get('name','test_user')
-    if not error:
-        print("创建的用户的id是:",id)
-    else:
-        print("创建用户失败:", error)
+#id,error=User.get('name','test_user')
+# if not error:
+#     print("创建的用户的id是:",id)
+# else:
+#     print("创建用户失败:", error)
 
 test_name=['test_restaurant','test_restaurant1','test_restaurant2','test_restaurant3']
 test_address=['123 Test St','456 Test Ave','789 Test Blvd','101 Test Rd']
@@ -60,7 +61,7 @@ test_description=['A test restaurant','A test restaurant1','A test restaurant2',
 
 #餐厅创建测试函数
 def test_create_restaurant():
-    
+    res_id=[]
     for i in range(4):
         data = {
             'name': test_name[i],
@@ -76,27 +77,43 @@ def test_create_restaurant():
             cuisine=data['cuisine'],
             description=data['description']
         )
+        
         if error:
             print("Error:", error)
         else:
             print("Restaurant created with ID:", restaurant_id)
+            res_id.append(restaurant_id)
+    return res_id
+
+#计算内层字典个数
+def count_inner_dicts(d):
+    count = 0
+    # for value in d.values():
+    #     if isinstance(value, list):  # 如果当前值是字典
+    #         count += 1              # 计数 +1
+    #         count += count_inner_dicts(value)  # 递归统计子字典
+    for item in d:
+        count+=1
+    return count
 
 #建立边失败的话，即使建立了餐厅的点，最后也不会返回餐厅的id
 if create:
-    test_create_restaurant()
+    res_id=test_create_restaurant()
 # 测试根据餐厅名称获取餐厅信息,且测试删除功能
-data,error=Restaurant.get_all()
+data1,error=Restaurant.get_all()
 if error:
     print("Error:", error)
 else:
-    print("Restaurant found:", data)
-#     # 删除餐厅
-#     restaurant_id = data['restaurantId']
-#     error = Restaurant.delete(restaurant_id)
-#     if error:
-#         print("Error:", error)
-#     else:
-#         print("Restaurant deleted successfully")
+    print("Restaurant found:", data1['total'][0])
+    # 删除餐厅
+    bl,error = Restaurant.delete('restaurantId',res_id[0])
+    if error:
+        print("Error:", error)
+    else:
+        print("Restaurant deleted successfully")
+        data2,error=Restaurant.get_all()
+        print("Restaurant found:",data2['total'][0])
+        print("similar?:",data1==data2)
 
 # data,error=Restaurant.get('name','test_restaurant')
 

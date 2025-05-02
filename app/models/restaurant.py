@@ -183,6 +183,8 @@ class Restaurant:
             return True, None
         except Exception as e:
             return False, str(e)
+        finally:
+            db.close()
 
     @staticmethod
     def get_by_owner(attribute='userId',value=None):

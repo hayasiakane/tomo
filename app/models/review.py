@@ -1,7 +1,8 @@
 from app.models import db
 import uuid
 from datetime import datetime
-from gremlin_python.process.traversal import __ 
+from gremlin_python.process.graph_traversal import __
+from gremlin_python.process.traversal import Order
 class Review:
     @staticmethod
     def create(user_id, restaurant_id, content, rating):
@@ -46,11 +47,11 @@ class Review:
             
             # 应用排序
             if sort == 'highest':
-                traversal = traversal.order().by('rating', decr)
+                traversal = traversal.order().by('rating',Order.desc)
             elif sort == 'lowest':
                 traversal = traversal.order().by('rating')
             else:  # latest
-                traversal = traversal.order().by('createdAt', decr)
+                traversal = traversal.order().by('createdAt',Order.desc)
             
             reviews = traversal.project('review', 'user', 'reply') \
                               .by(__.valueMap(True)) \

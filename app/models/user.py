@@ -6,7 +6,7 @@ from werkzeug.security import generate_password_hash  # 密码加密需要
 from werkzeug.security import check_password_hash   # 密码验证需要
 import os
 import datetime
-#from gremlin_python.process.traversal import __ 
+from gremlin_python.process.graph_traversal import __ 
 class User:
     @staticmethod
     def register(name, email, password, user_type="regular"): # 默认用户类型为普通用户
@@ -76,7 +76,7 @@ class User:
         except Exception as e:
             return None, f"数据库错误: {str(e)}"
         finally:
-            gremlin_client.close()
+            db.close()
 
     @staticmethod
     def get_by_id(user_id):
@@ -94,6 +94,8 @@ class User:
             }, None
         except Exception as e:
             return None, "User not found"
+        finally:
+            db.close()
     
     @staticmethod
     def get_by_email(user_email):
@@ -111,6 +113,8 @@ class User:
             }, None
         except Exception as e:
             return None, "User not found"
+        finally:
+            db.close()
     
     @staticmethod
     def get_by_name(user_name):
@@ -128,6 +132,8 @@ class User:
             }, None
         except Exception as e:
             return None, "User not found"
+        finally:
+            db.close()
         
     @staticmethod
     def get(attribute='userId', value=None):
@@ -145,6 +151,8 @@ class User:
             }, None
         except Exception as e:
             return None, "User not found"
+        finally:
+            db.close()
 
     @staticmethod
     def add_friend(user_id, friend_id):
@@ -158,20 +166,17 @@ class User:
             if existing:
                 return False, "Already friends"
             
-            # 创建双向好友关系
-            db.g.V().has('user', 'userId', user_id) \
-                   .addE('is_friend') \
-                   .to(__.V().has('user', 'userId', friend_id)) \
-                   .next()
-            
-            db.g.V().has('user', 'userId', friend_id) \
-                   .addE('is_friend') \
-                   .to(__.V().has('user', 'userId', user_id)) \
-                   .next()
+            # 创建单向好友关系
+            db.g.addE('is_friend') \
+                   .from_(__.V().has('user', 'userId', user_id)) \
+                    .to(__.V().has('user', 'userId', friend_id)) \
+                    .next()
             
             return True, None
         except Exception as e:
             return False, str(e)
+        finally:
+            db.close()
 
     @staticmethod
     def get_friends(user_id):
@@ -188,21 +193,17 @@ class User:
             } for f in friends], None
         except Exception as e:
             return None, str(e)
+        finally:
+            db.close()
 
     @staticmethod
     def remove_friend(user_id, friend_id):
         """移除好友关系"""
         try:
-            # 删除双向关系
+            # 删除单向关系
             db.g.V().has('user', 'userId', user_id) \
                    .outE('is_friend') \
-                   .where(__.inV().has('user', 'userId', friend_id)) \
-                   .drop() \
-                   .iterate()
-            
-            db.g.V().has('user', 'userId', friend_id) \
-                   .outE('is_friend') \
-                   .where(__.inV().has('user', 'userId', user_id)) \
+                   .where(db.g.inV().has('user', 'userId', friend_id)) \
                    .drop() \
                    .iterate()
             

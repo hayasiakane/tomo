@@ -1,5 +1,5 @@
 from . import db
-from gremlin_python.process.traversal import __ 
+from gremlin_python.process.graph_traversal import __ 
 class Friendship:
     @staticmethod
     def get_friend_recommendations(attribute='userId', value=None,limit=5):
@@ -9,7 +9,7 @@ class Friendship:
             recommendations = db.g.V().has('user', attribute, value) \
                                    .both('is_friend') \
                                    .both('is_friend') \
-                                   .where(__.neq(__.V().has('user', attribute, value))) \
+                                   .where(__.neq(__.V().has('user', 'userId',value))) \
                                    .where(__.not_(__.in_('is_friend') \
                                            .has('user', attribute, value))) \
                                    .dedup() \
@@ -24,6 +24,8 @@ class Friendship:
             } for r in recommendations], None
         except Exception as e:
             return None, str(e)
+        finally:
+            db.close()
 
     @staticmethod
     def get_common_friends(user_id, friend_id):
@@ -43,3 +45,5 @@ class Friendship:
             } for f in common_friends], None
         except Exception as e:
             return None, str(e)
+        finally:
+            db.close()
