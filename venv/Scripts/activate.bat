@@ -8,7 +8,12 @@ if defined _OLD_CODEPAGE (
     "%SystemRoot%\System32\chcp.com" 65001 > nul
 )
 
-set "VIRTUAL_ENV=D:\webtech\tomo\venv"
+rem 关键修改：动态获取当前虚拟环境路径
+set "VIRTUAL_ENV=%~dp0.."
+cd /d "%VIRTUAL_ENV%"
+set "VIRTUAL_ENV=%CD%"
+
+rem set "VIRTUAL_ENV=D:\webtech\tomo\venv"
 
 if not defined PROMPT set PROMPT=$P$G
 
