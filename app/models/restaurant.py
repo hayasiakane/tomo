@@ -203,3 +203,5 @@ class Restaurant:
             } for r in restaurants], None
         except Exception as e:
             return None, str(e)
+        finally:
+            db.close()

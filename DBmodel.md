@@ -206,7 +206,7 @@
             return None, str(e)
         ```
     
-    6. 删除餐厅顶点：delete #2025.5.1。未测试 
+    6. 删除餐厅顶点：delete 
         1. 语句
         `Restaurant.delete(attribute,value)`
 
@@ -272,7 +272,7 @@
 1. 属性
     1. reviewId:评论id，自动建立，不需要管
     2. content:评论内容
-    3. rating:评分
+    3. rating:评分(规定在1-5之间)
     4. createdAt:创建时间，自动获取，不需要管
 
 2. 函数
@@ -349,4 +349,6 @@
         1. 语句
         `Review.delete(review_id)`
 
-        2. 返回：布尔值
+        2. 作用：删除评论及相关回复
+        
+        3. 返回：布尔值

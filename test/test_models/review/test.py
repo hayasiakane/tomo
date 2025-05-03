@@ -100,21 +100,56 @@ def count_inner_dicts(d):
 if create:
     res_id=test_create_restaurant()
 # 测试根据餐厅名称获取餐厅信息,且测试删除功能
-data1,error=Restaurant.get_all()
+# data1,error=Restaurant.get_all()
+# if error:
+#     print("Error:", error)
+# else:
+#     print("Restaurant found:", data1['total'])
+#     # 删除餐厅
+#     bl,error = Restaurant.delete('restaurantId',res_id[0])
+#     if error:
+#         print("Error:", error)
+#     else:
+#         print("Restaurant deleted successfully")
+#         data2,error=Restaurant.get_all()
+#         print("Restaurant found:",data2['total'])
+#         print("similar?:",data1==data2)
+
+review_data={
+    'content': 'Great food!',
+    'rating': 4.5
+}
+
+re_id=[]
+# 测试添加评论
+#for i in range(0):
+    # 替换为实际的用户ID和餐厅ID
+    # user_id = id[i]  
+    # restaurant_id = res_id[i]  
+    # 添加评论
+review_id, error = Review.create(id[0], res_id[0], review_data['content'], review_data['rating'])
 if error:
     print("Error:", error)
 else:
-    print("Restaurant found:", data1['total'])
-    # 删除餐厅
-    bl,error = Restaurant.delete('restaurantId',res_id[0])
-    if error:
-        print("Error:", error)
-    else:
-        print("Restaurant deleted successfully")
-        data2,error=Restaurant.get_all()
-        print("Restaurant found:",data2['total'])
-        print("similar?:",data1==data2)
+    print("Review added with ID:", review_id)
+    re_id.append(review_id)
 
+# i in range(0):
+reply_id,error=Review.add_reply(review_id,id[0],'reply content:hi')
+if error:
+    print("Error:", error)
+else:
+    print("reply added with ID:", review_id)
+# # #测试查询用户评论
+user_re,error=Review.get_by_restaurant(res_id[0])
+if error:
+    print("Error:", error)
+else:
+    for i in range(len(user_re)):
+        print("User reviews:",user_re[i]['content'])
+        print("reply:",user_re[i]['reply']['content'])
+
+Review.delete(review_id)
 # data,error=Restaurant.get('name','test_restaurant')
 
 # if error:

@@ -49,9 +49,9 @@ else:
     print("共同好友:", comfri_data)
 #推荐好友测试
 
-# recommendations, error = Friendship.get_friend_recommendations('userId', id[0])
-# if error:
-#     print("Error:", error)
-# else: 
-#     print("好友推荐:", recommendations)
+recommendations, error = Friendship.get_friend_recommendations('userId', id[0])
+if error:
+    print("Error:", error)
+else: 
+    print("好友推荐:", recommendations)
 #推荐好友测试

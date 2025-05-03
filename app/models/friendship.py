@@ -1,21 +1,27 @@
 from . import db
 from gremlin_python.process.graph_traversal import __ 
+from gremlin_python.process.traversal import T, P
 class Friendship:
     @staticmethod
     def get_friend_recommendations(attribute='userId', value=None,limit=5):
         """获取好友推荐（基于好友的好友）"""
         try:
-            # 获取好友的好友（排除已经是好友的和自己）
-            recommendations = db.g.V().has('user', attribute, value) \
-                                   .both('is_friend') \
-                                   .both('is_friend') \
-                                   .where(__.neq(__.V().has('user', 'userId',value))) \
-                                   .where(__.not_(__.in_('is_friend') \
-                                           .has('user', attribute, value))) \
-                                   .dedup() \
-                                   .limit(limit) \
-                                   .valueMap('name', 'email', 'userId') \
-                                   .toList()
+                # 获取当前用户顶点
+            current_user = db.g.V().has('user', attribute, value).next()
+            # 获取直接好友列表（用于后续过滤）
+            friends = db.g.V().has('user', attribute, value).both('is_friend').id_().toList()
+            # 获取二度人脉（排除自己和直接好友）
+            recommendations = (
+            db.g.V().has('user', attribute, value)
+            .both('is_friend')  # 一度人脉
+            .both('is_friend')  # 二度人脉
+            .has(T.id, P.neq(current_user.id))  # ✅ 排除自己（使用 T.id 和 P.neq）
+            .has(T.id, P.without(*friends))     # ✅ 排除直接好友（使用 P.without）
+            .dedup()
+            .limit(limit)
+            .valueMap('name', 'email', 'userId')
+            .toList()
+        )
             
             return [{
                 'userId': r['userId'][0],
