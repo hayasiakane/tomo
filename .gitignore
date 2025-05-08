@@ -3,3 +3,13 @@ Dockerfile.gremlin
 Dockerfile
 login.bat
 “类大众点评”项目.pptx
+
+# 忽略所有 __pycache__ 文件夹
+__pycache__/
+
+# 忽略 Python 编译生成的 .pyc 和 .pyo 文件
+*.py[c|o]
+
+# 忽略 __pycache__ 下的所有文件（可选，因为 __pycache__/ 已经覆盖）
+# __pycache__/*.pyc
+# __pycache__/*.pyo

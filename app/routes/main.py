@@ -8,7 +8,7 @@ def index():
 
 @main_bp.route('/restaurants')
 def restaurant_list():
-    return render_template('restaurant/list.html')
+    return render_template('restaurant/restaurants.html')
 
 @main_bp.route('/restaurants/<restaurant_id>')
 def restaurant_detail(restaurant_id):
@@ -18,3 +18,6 @@ def restaurant_detail(restaurant_id):
 def restaurant_add():
     return render_template('templates/restaurant/add.html')
 
+@main_bp.route('/my-reviews')
+def myreviews():
+    return render_template('review/myreview.html')
