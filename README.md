@@ -4,7 +4,7 @@
 food-review-demo/
 ├── app/                      # 主应用目录
 │   ├── __init__.py           # 应用工厂函数和初始化
-│   ├── models/               # 数据模型和Gremlin操作   负责人：hayasiakane
+│   ├── models/               # 数据模型和Gremlin操作   负责人1：hayasiakane
 │   │   ├── __init__.py
 │   │   ├── user.py           # 用户相关操作
 │   │   ├── restaurant.py     # 餐厅相关操作
@@ -12,27 +12,27 @@ food-review-demo/
 │   │   └── friendship.py     # 好友关系相关操作
 │   ├── routes/               # 路由和视图函数
 │   │   ├── __init__.py
-│   │   ├── auth.py           # 认证相关路由
-│   │   ├── user.py           # 用户相关路由
-│   │   ├── restaurant.py     # 餐厅相关路由
-│   │   └── review.py         # 评价相关路由
+│   │   ├── auth.py           # 认证相关路由    负责人2：樊
+│   │   ├── user.py           # 用户相关路由    负责人2：樊
+│   │   ├── restaurant.py     # 餐厅相关路由    负责人3：季
+│   │   └── review.py         # 评价相关路由    负责人4：钟
 │   ├── static/               # 静态文件
 │   │   ├── css/
 │   │   ├── js/
 │   │   └── images/
 │   ├── templates/            # HTML模板
-│   │   ├── base.html         # 基础模板
-│   │   ├── auth/             # 认证相关模板
-│   │   │   ├── login.html
+│   │   ├── base.html         # 基础模板     负责人5：王
+│   │   ├── auth/             # 认证相关模板   负责人5：王
+│   │   │   ├── login.html   
 │   │   │   └── register.html
-│   │   ├── restaurant/       # 餐厅相关模板
+│   │   ├── restaurant/       # 餐厅相关模板   负责人6：雷
 │   │   │   ├── list.html
 │   │   │   ├── detail.html
 │   │   │   └── add.html
-│   │   ├── user/            # 用户相关模板
+│   │   ├── user/            # 用户相关模板    负责人7：叶婷
 │   │   │   ├── profile.html
 │   │   │   └── friends.html
-│   │   └── review/          # 评价相关模板
+│   │   └── review/          # 评价相关模板    负责人6：雷
 │   │       └── list.html
 │   ├── utils/                # 工具函数
 │   │   ├── __init__.py

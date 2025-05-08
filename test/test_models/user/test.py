@@ -24,7 +24,7 @@ def test_reg():
     # 测试注册用户
     data = {
         'name': 'test_user',
-        'email': '123@123.com',
+        'email': '128@128.com',
         'password':'123456',
         'type': 'business',
         }
@@ -46,5 +46,10 @@ def search_user_by_email(email):
 #     print("创建用户失败:", error)
 
 #print(search_user_by_email('123@123.com'))
-print(User.delete('email','123@123.com'))
+#print(User.delete('email','123@123.com'))
 #test_db_connection()
+res,error=User.authenticate('128@128.com','123456')
+if res:
+    print("用户登录成功:", res)
+else:
+    print("用户登录失败:", error)

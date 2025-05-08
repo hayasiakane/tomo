@@ -40,39 +40,36 @@ class User:
         finally:
             db.close()  # 关闭连接
 
-    @classmethod
-    def authenticate(cls, email, password):
+    @staticmethod
+    def authenticate(email, password):
         try:
-            # 连接Gremlin Server
-            gremlin_client = client.Client(
-                'ws://localhost:8182/gremlin', 
-                'g',
-                username=os.getenv('GREMLIN_USER', ''),
-                password=os.getenv('GREMLIN_PASS', '')
-            )
-            
             # 查询用户数据（参数化查询）
-            query = """
-            g.V()
-             .has('user', 'email', email)
-             .project('user_id', 'password', 'name')
-             .by(coalesce(values('user_id'), constant('')))
-             .by(coalesce(values('password'), constant('')))
-             .by(coalesce(values('name'), constant('')))
-            """
-            result = gremlin_client.submit(query, {'email': email}).all().result()
-            print("Gremlin返回数据:", result) 
-            if not result or not result[0]['password']:
+            results = db.g.V()\
+                .has('user', 'email', email)\
+                .valueMap('userId', 'name', 'email', 'type', 'password')\
+                .toList()
+                
+            if not results:
                 return None, "用户不存在"
             
+            # Get the first result (should be only one since email should be unique)
+            user_data = results[0]
+            
+            # Check if password exists in the result
+            if 'password' not in user_data or not user_data['password']:
+                return None, "用户数据不完整"
+            
             # 验证密码
-            if not check_password_hash(result[0]['password'],password):#not check_password_hash(result[0]['password'], password):
+            if not check_password_hash(user_data['password'][0], password):
                 return None, "密码错误"
-           
+            
             return {
-                'user_id': result[0]['user_id'],
-                'name': result[0]['name']
+                'user_id': user_data['userId'][0] if 'userId' in user_data else None,
+                'name': user_data['name'][0] if 'name' in user_data else None,
+                'email': user_data['email'][0] if 'email' in user_data else None,
+                'type': user_data['type'][0] if 'type' in user_data else None,
             }, None 
+    
         except Exception as e:
             return None, f"数据库错误: {str(e)}"
         finally:

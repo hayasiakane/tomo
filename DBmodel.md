@@ -31,9 +31,11 @@
         3. 返回内容
         ```
         return {
-                'user_id': result[0]['user_id'],
-                'name': result[0]['name']
-            }(json), None(状态码)
+                'user_id': user_data['userId'][0] if 'userId' in user_data else None,
+                'name': user_data['name'][0] if 'name' in user_data else None,
+                'email': user_data['email'][0] if 'email' in user_data else None,
+                'type': user_data['type'][0] if 'type' in user_data else None,
+            }, None 
         ```
     
     4. 根据属性查询用户：get(attribute='userId', value=None)
