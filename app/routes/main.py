@@ -12,11 +12,11 @@ def restaurant_list():
 
 @main_bp.route('/restaurants/<restaurant_id>')
 def restaurant_detail(restaurant_id):
-    return render_template('templates/restaurant/detail.html', restaurant_id=restaurant_id)
+    return render_template('restaurant/detail.html', restaurant_id=restaurant_id)
 
 @main_bp.route('/restaurants/add')
 def restaurant_add():
-    return render_template('templates/restaurant/add.html')
+    return render_template('restaurant/add.html')
 
 @main_bp.route('/my-reviews')
 def myreviews():

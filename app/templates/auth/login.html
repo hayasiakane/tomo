@@ -61,6 +61,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // 保存登录状态
     localStorage.setItem('token', response.data.token);
     localStorage.setItem('userId', response.data.userId);
+    localStorage.setItem('name', response.data.name);
+    localStorage.setItem('type', response.data.type);
     window.location.href = '/';  // 跳转到首页
 })
 .catch(error => {

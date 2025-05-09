@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
 from app.models.user import User
 from app.utils.decorators import login_required
 from werkzeug.security import generate_password_hash
@@ -29,3 +29,20 @@ def friends():
     
     return render_template('user/friends.html', friends=friends) #friends.html未生成
 
+# 新增通过用户ID获取用户信息的API
+@user_bp.route('/api/users/<userId>', methods=['GET'])
+def api_get_user(userId):
+    user, error = User.get_by_id(userId)
+    if error:
+        return {'error': error}, 404
+    
+    # 返回用户信息（过滤敏感字段）
+    response_data = {
+        'userId': user['userId'],
+        'name': user['name'],
+        'email': user['email'],
+        'type': user['type'],
+        'createdAt': user['createdAt']
+    }
+
+    return jsonify(response_data), 200

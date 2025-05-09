@@ -44,7 +44,8 @@ def api_login():
         "message": "登录成功",
         "userId": user['user_id'],
         "name": user['name'],
-        "token": "模拟Token"  # 生产环境替换为真实JWT
+        "token": "模拟Token",  # 生产环境替换为真实JWT
+        "type": user['type']
     }), 200
 
 @auth_bp.route('/register', methods=['GET'])
