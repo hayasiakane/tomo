@@ -8,17 +8,43 @@
 >
   <div class="row align-items-center">
     <div class="col-md-6">
-      <h1 class="hero-tagline">美食不止于味蕾，更是时光的记忆</h1>
-      <p class="hero-description">
-        与志同道合的食友一起，定格每一刻舌尖上的感动，留住每一段美味的故事
-      </p>
-      <div class="d-grid gap-3 d-md-flex mt-4">
-        <a href="/restaurants" class="btn btn-primary btn-lg px-4 me-md-2">
-          <i class="bi bi-search me-2"></i>发现美食
-        </a>
-        <a href="/register" class="btn btn-outline-secondary btn-lg px-4">
-          <i class="bi bi-person-plus me-2"></i>加入我们
-        </a>
+      <!-- 普通用户/未登录用户内容 -->
+      <div id="regular-user-content">
+        <h1 class="hero-tagline">美食不止于味蕾，更是时光的记忆</h1>
+        <p class="hero-description">
+          与志同道合的食友一起，定格每一刻舌尖上的感动，留住每一段美味的故事
+        </p>
+        <div class="d-grid gap-3 d-md-flex mt-4">
+          <a href="/restaurants" class="btn btn-primary btn-lg px-4 me-md-2">
+            <i class="bi bi-search me-2"></i>发现美食
+          </a>
+          <a
+            href="/register"
+            class="btn btn-outline-secondary btn-lg px-4"
+            id="join-us-btn"
+          >
+            <i class="bi bi-person-plus me-2"></i>加入我们
+          </a>
+        </div>
+      </div>
+
+      <!-- 商家用户内容 -->
+      <div id="business-user-content" style="display: none">
+        <h1 class="hero-tagline">欢迎回到您的餐厅管理中心</h1>
+        <p class="hero-description">
+          管理您的餐厅信息，回复顾客评价，发布最新活动与优惠
+        </p>
+        <div class="d-grid gap-3 d-md-flex mt-4">
+          <a href="/my-restaurants" class="btn btn-primary btn-lg px-4 me-md-2">
+            <i class="bi bi-shop me-2"></i>我的餐厅
+          </a>
+          <a
+            href="/restaurant/add"
+            class="btn btn-outline-secondary btn-lg px-4"
+          >
+            <i class="bi bi-plus-circle me-2"></i>添加餐厅
+          </a>
+        </div>
       </div>
     </div>
     <div class="col-md-6">
@@ -213,6 +239,26 @@
 {% endblock %} {% block scripts %}
 <script>
   document.addEventListener("DOMContentLoaded", function () {
+    // 检查登录状态并根据用户类型显示不同内容
+    const token = localStorage.getItem("token");
+    const userType = localStorage.getItem("type");
+
+    if (token) {
+      // 用户已登录
+      const joinUsBtn = document.getElementById("join-us-btn");
+      if (joinUsBtn) {
+        joinUsBtn.style.display = "none";
+      }
+
+      // 根据用户类型显示不同内容
+      if (userType === "business") {
+        // 商家用户
+        document.getElementById("regular-user-content").style.display = "none";
+        document.getElementById("business-user-content").style.display =
+          "block";
+      }
+    }
+
     // 获取热门餐厅
     axios
       .get("/api/restaurants?limit=4")
