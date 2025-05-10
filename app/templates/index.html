@@ -227,7 +227,7 @@
         <div class="carousel-inner">
           <div class="carousel-item active">
             <img
-              src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80"
+              src="{{ url_for('static', filename='images/restaurant-interior.jpg') }}"
               class="d-block w-100"
               alt="精致餐厅"
               style="height: 350px; object-fit: cover"
@@ -246,7 +246,7 @@
           </div>
           <div class="carousel-item">
             <img
-              src="https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80"
+              src="{{ url_for('static', filename='images/delicious-food.jpg') }}"
               class="d-block w-100"
               alt="美味佳肴"
               style="height: 350px; object-fit: cover"
@@ -265,7 +265,7 @@
           </div>
           <div class="carousel-item">
             <img
-              src="https://images.unsplash.com/photo-1559339352-11d035aa65de?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1074&q=80"
+              src="{{ url_for('static', filename='images/dessert.jpg') }}"
               class="d-block w-100"
               alt="甜点饮品"
               style="height: 350px; object-fit: cover"
@@ -476,7 +476,7 @@
         <div class="row g-0">
           <div class="col-md-6">
             <img
-              src="https://images.unsplash.com/photo-1528605248644-14dd04022da1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80"
+              src="{{ url_for('static', filename='images/friends-dining.jpg') }}"
               class="img-fluid h-100 w-100"
               style="object-fit: cover"
               alt="朋友聚餐"
@@ -561,7 +561,10 @@
                     <div class="col-md-3 col-sm-6 mb-4">
                         <div class="card h-100 restaurant-card border-0 shadow-sm">
                             <div class="position-relative">
-                                <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" 
+                                <img src="${
+                                  restaurant.image ||
+                                  "/static/images/restaurant-interior.jpg"
+                                }" 
                                      class="card-img-top" alt="${
                                        restaurant.name
                                      }" style="height: 180px; object-fit: cover;">
@@ -706,7 +709,10 @@
             <div class="col-md-3 col-sm-6 mb-4">
                 <div class="card h-100 restaurant-card border-0 shadow-sm">
                     <div class="position-relative">
-                        <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" 
+                        <img src="${
+                          restaurant.image ||
+                          "/static/images/restaurant-interior.jpg"
+                        }"
                              class="card-img-top" alt="${
                                restaurant.name
                              }" style="height: 180px; object-fit: cover;">
