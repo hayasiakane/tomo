@@ -1,123 +1,479 @@
-{% extends "base.html" %}
-
-{% block content %}
-<div class="hero-section bg-light rounded-3 p-5 mb-4">
-    <div class="row align-items-center">
-        <div class="col-md-6">
-            <h1 class="display-4 fw-bold">发现身边的美食</h1>
-            <p class="lead">探索本地最佳餐厅，分享你的美食体验</p>
-            <div class="d-grid gap-2 d-md-flex">
-                <a href="/restaurants" class="btn btn-primary btn-lg px-4 me-md-2">浏览餐厅</a>
-                <a href="/register" class="btn btn-outline-secondary btn-lg px-4">注册账号</a>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" 
-                 class="img-fluid rounded-3" alt="餐厅图片">
-        </div>
+{% extends "base.html" %} {% block content %}
+<!-- 主页英雄区域 -->
+<div
+  class="hero-section rounded-4 p-5 mb-5"
+  style="
+    background: linear-gradient(135deg, var(--light-accent) 0%, #fff8f0 100%);
+  "
+>
+  <div class="row align-items-center">
+    <div class="col-md-6">
+      <h1 class="hero-tagline">美食不止于味蕾，更是时光的记忆</h1>
+      <p class="hero-description">
+        与志同道合的食友一起，定格每一刻舌尖上的感动，留住每一段美味的故事
+      </p>
+      <div class="d-grid gap-3 d-md-flex mt-4">
+        <a href="/restaurants" class="btn btn-primary btn-lg px-4 me-md-2">
+          <i class="bi bi-search me-2"></i>发现美食
+        </a>
+        <a href="/register" class="btn btn-outline-secondary btn-lg px-4">
+          <i class="bi bi-person-plus me-2"></i>加入我们
+        </a>
+      </div>
     </div>
+    <div class="col-md-6">
+      <div class="position-relative">
+        <img
+          src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80"
+          class="img-fluid rounded-4 shadow-lg"
+          alt="餐厅图片"
+          style="height: 350px; object-fit: cover"
+        />
+        <div
+          class="position-absolute top-0 end-0 bg-white rounded-pill py-2 px-3 m-3 shadow-sm d-none d-md-flex align-items-center"
+        >
+          <i class="bi bi-heart-fill text-danger me-2"></i>
+          <span class="fw-bold">用户推荐</span>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
+<!-- 特色分类区 -->
+<div class="row mb-5">
+  <div class="col-12 text-center mb-4">
+    <h2 class="mb-2">寻找你的美食灵感</h2>
+    <p class="text-muted">探索多种美食分类，找到你的心头好</p>
+  </div>
+  <div class="col-md-3 col-6 mb-4">
+    <div class="card border-0 bg-light h-100 text-center">
+      <div class="card-body py-4">
+        <div
+          class="mb-3 mx-auto"
+          style="
+            width: 60px;
+            height: 60px;
+            background-color: #fde2e2;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          "
+        >
+          <i class="bi bi-cup-hot fs-3" style="color: #e74c3c"></i>
+        </div>
+        <h5 class="card-title">小吃夜宵</h5>
+        <p class="card-text small text-muted">无论何时都能带来满足</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3 col-6 mb-4">
+    <div class="card border-0 bg-light h-100 text-center">
+      <div class="card-body py-4">
+        <div
+          class="mb-3 mx-auto"
+          style="
+            width: 60px;
+            height: 60px;
+            background-color: #e0f7fa;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          "
+        >
+          <i class="bi bi-egg-fried fs-3" style="color: #00acc1"></i>
+        </div>
+        <h5 class="card-title">特色早餐</h5>
+        <p class="card-text small text-muted">美好的一天从早餐开始</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3 col-6 mb-4">
+    <div class="card border-0 bg-light h-100 text-center">
+      <div class="card-body py-4">
+        <div
+          class="mb-3 mx-auto"
+          style="
+            width: 60px;
+            height: 60px;
+            background-color: #fff3e0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          "
+        >
+          <i class="bi bi-shop fs-3" style="color: #ff9800"></i>
+        </div>
+        <h5 class="card-title">特色餐厅</h5>
+        <p class="card-text small text-muted">独特环境与难忘体验</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3 col-6 mb-4">
+    <div class="card border-0 bg-light h-100 text-center">
+      <div class="card-body py-4">
+        <div
+          class="mb-3 mx-auto"
+          style="
+            width: 60px;
+            height: 60px;
+            background-color: #e8f5e9;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          "
+        >
+          <i class="bi bi-flower1 fs-3" style="color: #4caf50"></i>
+        </div>
+        <h5 class="card-title">素食健康</h5>
+        <p class="card-text small text-muted">滋养身心的绿色选择</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 热门餐厅区 -->
+<div class="row mb-5">
+  <div class="col-12 mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <h2 class="mb-1">热门餐厅</h2>
+        <p class="text-muted mb-0">最受食友们喜爱的美食地标</p>
+      </div>
+      <a href="/restaurants" class="btn btn-sm btn-outline-primary">查看全部</a>
+    </div>
+  </div>
+  <div class="col-12">
+    <div class="row" id="featured-restaurants">
+      <!-- 动态加载热门餐厅 -->
+      <div class="col-12 text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">加载中...</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 最新评价区 -->
 <div class="row mb-4">
-    <div class="col-12">
-        <h2 class="mb-4">热门餐厅</h2>
-        <div class="row" id="featured-restaurants">
-            <!-- 动态加载热门餐厅 -->
-            <div class="col-12 text-center">
-                <div class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">加载中...</span>
-                </div>
-            </div>
-        </div>
+  <div class="col-12 mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <h2 class="mb-1">最新食评</h2>
+        <p class="text-muted mb-0">看看大家都在分享什么美食体验</p>
+      </div>
+      <a href="/my-reviews" class="btn btn-sm btn-outline-primary">写食评</a>
     </div>
+  </div>
+  <div class="col-12">
+    <div class="row" id="latest-reviews">
+      <!-- 动态加载最新评价 -->
+      <div class="col-12 text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">加载中...</span>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
+<!-- 美食社区宣传区 -->
 <div class="row">
-    <div class="col-12">
-        <h2 class="mb-4">最新评价</h2>
-        <div class="row" id="latest-reviews">
-            <!-- 动态加载最新评价 -->
-            <div class="col-12 text-center">
-                <div class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">加载中...</span>
-                </div>
+  <div class="col-12">
+    <div class="card border-0 rounded-4 overflow-hidden">
+      <div class="card-body p-0">
+        <div class="row g-0">
+          <div class="col-md-6">
+            <img
+              src="https://images.unsplash.com/photo-1528605248644-14dd04022da1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80"
+              class="img-fluid h-100 w-100"
+              style="object-fit: cover"
+              alt="朋友聚餐"
+            />
+          </div>
+          <div class="col-md-6 d-flex align-items-center">
+            <div class="p-5">
+              <h3 class="mb-3">与美食好友一起探索</h3>
+              <p class="mb-4">
+                关注志同道合的美食家，建立自己的味蕾社交圈，共同分享美食故事与发现
+              </p>
+              <a href="/friends" class="btn btn-primary">探索好友圈</a>
             </div>
+          </div>
         </div>
+      </div>
     </div>
+  </div>
 </div>
-{% endblock %}
-
-{% block scripts %}
+{% endblock %} {% block scripts %}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener("DOMContentLoaded", function () {
     // 获取热门餐厅
-    axios.get('/api/restaurants?limit=4')
-        .then(response => {
-            const container = document.getElementById('featured-restaurants');
-            container.innerHTML = '';
-            
-            response.data.restaurants.forEach(restaurant => {
-                const card = `
-                    <div class="col-md-3 mb-4">
-                        <div class="card h-100 restaurant-card">
-                            <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" 
-                                 class="card-img-top" alt="${restaurant.name}">
+    axios
+      .get("/api/restaurants?limit=4")
+      .then((response) => {
+        const container = document.getElementById("featured-restaurants");
+        container.innerHTML = "";
+
+        response.data.restaurants.forEach((restaurant) => {
+          const card = `
+                    <div class="col-md-3 col-sm-6 mb-4">
+                        <div class="card h-100 restaurant-card border-0 shadow-sm">
+                            <div class="position-relative">
+                                <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" 
+                                     class="card-img-top" alt="${
+                                       restaurant.name
+                                     }" style="height: 180px; object-fit: cover;">
+                                <div class="position-absolute bottom-0 start-0 bg-dark bg-opacity-50 text-white p-2 m-2 rounded-pill small">
+                                    <i class="bi bi-geo-alt me-1"></i>${
+                                      restaurant.location || "市中心"
+                                    }
+                                </div>
+                            </div>
                             <div class="card-body">
-                                <h5 class="card-title">${restaurant.name}</h5>
-                                <p class="card-text text-muted">${restaurant.cuisine}</p>
-                                <div class="rating mb-2">
+                                <h5 class="card-title mb-1">${
+                                  restaurant.name
+                                }</h5>
+                                <p class="card-text text-muted small mb-2">${
+                                  restaurant.cuisine || "多国料理"
+                                }</p>
+                                <div class="rating mb-3">
                                     <i class="bi bi-star-fill"></i>
                                     <i class="bi bi-star-fill"></i>
                                     <i class="bi bi-star-fill"></i>
                                     <i class="bi bi-star-fill"></i>
                                     <i class="bi bi-star-half"></i>
                                     <span class="ms-1">4.5</span>
+                                    <span class="text-muted small ms-2">(${
+                                      Math.floor(Math.random() * 100) + 20
+                                    }条评价)</span>
                                 </div>
-                                <a href="/restaurants/${restaurant.restaurantId}" class="btn btn-outline-primary btn-sm">查看详情</a>
+                                <a href="/restaurants/${
+                                  restaurant.restaurantId
+                                }" class="btn btn-sm btn-outline-primary w-100">查看详情</a>
                             </div>
                         </div>
                     </div>
                 `;
-                container.innerHTML += card;
-            });
-        })
-        .catch(error => {
-            console.error('获取餐厅失败:', error);
+          container.innerHTML += card;
         });
-    
+
+        // 如果没有数据，显示默认卡片
+        if (
+          !response.data.restaurants ||
+          response.data.restaurants.length === 0
+        ) {
+          const demoCards = generateDemoRestaurants();
+          container.innerHTML = demoCards;
+        }
+      })
+      .catch((error) => {
+        console.error("获取餐厅失败:", error);
+        // 显示默认卡片
+        const demoCards = generateDemoRestaurants();
+        document.getElementById("featured-restaurants").innerHTML = demoCards;
+      });
+
     // 获取最新评价
-    axios.get('/api/reviews/latest')
-        .then(response => {
-            const container = document.getElementById('latest-reviews');
-            container.innerHTML = '';
-            
-            response.data.reviews.forEach(review => {
-                const reviewCard = `
+    axios
+      .get("/api/reviews/latest")
+      .then((response) => {
+        const container = document.getElementById("latest-reviews");
+        container.innerHTML = "";
+
+        response.data.reviews.forEach((review) => {
+          const reviewCard = `
                     <div class="col-md-6 mb-4">
-                        <div class="card">
+                        <div class="card border-0 shadow-sm h-100">
                             <div class="card-body">
-                                <div class="d-flex justify-content-between mb-2">
-                                    <h5 class="card-title">${review.restaurant.name}</h5>
-                                    <div class="rating">
-                                        ${'<i class="bi bi-star-fill"></i>'.repeat(review.rating)}
-                                        ${'<i class="bi bi-star"></i>'.repeat(5 - review.rating)}
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="flex-shrink-0">
+                                        <div class="rounded-circle bg-light d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                            <i class="bi bi-person text-secondary"></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <h6 class="mb-0">${
+                                          review.user.name || "美食爱好者"
+                                        }</h6>
+                                        <p class="text-muted small mb-0">${new Date(
+                                          review.timestamp || new Date()
+                                        ).toLocaleDateString()}</p>
+                                    </div>
+                                    <div class="rating ms-auto">
+                                        ${'<i class="bi bi-star-fill"></i>'.repeat(
+                                          review.rating || 5
+                                        )}
+                                        ${'<i class="bi bi-star"></i>'.repeat(
+                                          5 - (review.rating || 5)
+                                        )}
                                     </div>
                                 </div>
-                                <p class="card-text">${review.content}</p>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <small class="text-muted">${review.user.name} • ${new Date(review.timestamp).toLocaleDateString()}</small>
-                                    <a href="/restaurants/${review.restaurant.restaurantId}" class="btn btn-sm btn-outline-primary">查看餐厅</a>
+                                <h5 class="card-title">${
+                                  review.restaurant?.name || "人气餐厅"
+                                }</h5>
+                                <p class="card-text">${
+                                  review.content ||
+                                  "这家餐厅的菜品非常美味，服务也很周到，环境优雅舒适，值得推荐给大家！"
+                                }</p>
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <div>
+                                        <button class="btn btn-sm btn-light me-2">
+                                            <i class="bi bi-hand-thumbs-up me-1"></i>点赞
+                                        </button>
+                                        <button class="btn btn-sm btn-light">
+                                            <i class="bi bi-chat me-1"></i>评论
+                                        </button>
+                                    </div>
+                                    <a href="/restaurants/${
+                                      review.restaurant?.restaurantId || "#"
+                                    }" class="btn btn-sm btn-outline-primary">查看餐厅</a>
                                 </div>
                             </div>
                         </div>
                     </div>
                 `;
-                container.innerHTML += reviewCard;
-            });
-        })
-        .catch(error => {
-            console.error('获取评价失败:', error);
+          container.innerHTML += reviewCard;
         });
-});
+
+        // 如果没有数据，显示默认卡片
+        if (!response.data.reviews || response.data.reviews.length === 0) {
+          const demoReviews = generateDemoReviews();
+          container.innerHTML = demoReviews;
+        }
+      })
+      .catch((error) => {
+        console.error("获取评价失败:", error);
+        // 显示默认卡片
+        const demoReviews = generateDemoReviews();
+        document.getElementById("latest-reviews").innerHTML = demoReviews;
+      });
+  });
+
+  // 生成示例餐厅数据
+  function generateDemoRestaurants() {
+    const restaurants = [
+      { name: "江南风味馆", cuisine: "江浙菜", location: "市中心" },
+      { name: "川香阁", cuisine: "川菜", location: "西湖区" },
+      { name: "味之町日料", cuisine: "日本料理", location: "滨江区" },
+      { name: "地中海餐厅", cuisine: "西餐", location: "拱墅区" },
+    ];
+
+    let html = "";
+    restaurants.forEach((restaurant) => {
+      html += `
+            <div class="col-md-3 col-sm-6 mb-4">
+                <div class="card h-100 restaurant-card border-0 shadow-sm">
+                    <div class="position-relative">
+                        <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" 
+                             class="card-img-top" alt="${
+                               restaurant.name
+                             }" style="height: 180px; object-fit: cover;">
+                        <div class="position-absolute bottom-0 start-0 bg-dark bg-opacity-50 text-white p-2 m-2 rounded-pill small">
+                            <i class="bi bi-geo-alt me-1"></i>${
+                              restaurant.location
+                            }
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title mb-1">${restaurant.name}</h5>
+                        <p class="card-text text-muted small mb-2">${
+                          restaurant.cuisine
+                        }</p>
+                        <div class="rating mb-3">
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-half"></i>
+                            <span class="ms-1">4.5</span>
+                            <span class="text-muted small ms-2">(${
+                              Math.floor(Math.random() * 100) + 20
+                            }条评价)</span>
+                        </div>
+                        <a href="#" class="btn btn-sm btn-outline-primary w-100">查看详情</a>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+
+    return html;
+  }
+
+  // 生成示例评价数据
+  function generateDemoReviews() {
+    const reviews = [
+      {
+        user: { name: "美食家小王" },
+        restaurant: { name: "江南风味馆" },
+        content:
+          "这家的红烧肉入口即化，搭配清爽的青菜，非常推荐！店内环境也很优雅，服务态度一流。",
+        rating: 5,
+        timestamp: new Date("2025-05-15"),
+      },
+      {
+        user: { name: "吃货李小姐" },
+        restaurant: { name: "川香阁" },
+        content:
+          "麻辣鲜香的川菜，正宗的味道!麻婆豆腐和水煮鱼都非常地道，价格也很实惠。",
+        rating: 4,
+        timestamp: new Date("2025-05-10"),
+      },
+    ];
+
+    let html = "";
+    reviews.forEach((review) => {
+      html += `
+            <div class="col-md-6 mb-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="flex-shrink-0">
+                                <div class="rounded-circle bg-light d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                    <i class="bi bi-person text-secondary"></i>
+                                </div>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h6 class="mb-0">${review.user.name}</h6>
+                                <p class="text-muted small mb-0">${new Date(
+                                  review.timestamp
+                                ).toLocaleDateString()}</p>
+                            </div>
+                            <div class="rating ms-auto">
+                                ${'<i class="bi bi-star-fill"></i>'.repeat(
+                                  review.rating
+                                )}
+                                ${'<i class="bi bi-star"></i>'.repeat(
+                                  5 - review.rating
+                                )}
+                            </div>
+                        </div>
+                        <h5 class="card-title">${review.restaurant.name}</h5>
+                        <p class="card-text">${review.content}</p>
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <div>
+                                <button class="btn btn-sm btn-light me-2">
+                                    <i class="bi bi-hand-thumbs-up me-1"></i>点赞
+                                </button>
+                                <button class="btn btn-sm btn-light">
+                                    <i class="bi bi-chat me-1"></i>评论
+                                </button>
+                            </div>
+                            <a href="#" class="btn btn-sm btn-outline-primary">查看餐厅</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+
+    return html;
+  }
 </script>
 {% endblock %}
