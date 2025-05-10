@@ -128,6 +128,21 @@
     position: relative;
     top: -1px;
   }
+
+  /* 分类卡片交互效果 */
+  .category-card {
+    transition: all 0.3s ease;
+    cursor: pointer;
+  }
+
+  .category-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  }
+
+  .category-card:hover .category-icon {
+    transform: scale(1.1);
+  }
 </style>
 
 <!-- 主页英雄区域 -->
@@ -306,92 +321,104 @@
     <p class="text-muted">探索多种美食分类，找到你的心头好</p>
   </div>
   <div class="col-md-3 col-6 mb-4">
-    <div class="card border-0 bg-light h-100 text-center">
-      <div class="card-body py-4">
-        <div
-          class="mb-3 mx-auto"
-          style="
-            width: 60px;
-            height: 60px;
-            background-color: #fde2e2;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-          "
-        >
-          <i class="bi bi-cup-hot fs-3" style="color: #e74c3c"></i>
+    <a href="/restaurants?cuisine=中餐" class="text-decoration-none">
+      <div class="card border-0 bg-light h-100 text-center category-card">
+        <div class="card-body py-4">
+          <div
+            class="mb-3 mx-auto category-icon"
+            style="
+              width: 60px;
+              height: 60px;
+              background-color: #fde2e2;
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              transition: transform 0.3s ease;
+            "
+          >
+            <i class="bi bi-cup-straw fs-3" style="color: #e74c3c"></i>
+          </div>
+          <h5 class="card-title">中餐</h5>
+          <p class="card-text small text-muted">传统美味，回味无穷</p>
         </div>
-        <h5 class="card-title">小吃夜宵</h5>
-        <p class="card-text small text-muted">无论何时都能带来满足</p>
       </div>
-    </div>
+    </a>
   </div>
   <div class="col-md-3 col-6 mb-4">
-    <div class="card border-0 bg-light h-100 text-center">
-      <div class="card-body py-4">
-        <div
-          class="mb-3 mx-auto"
-          style="
-            width: 60px;
-            height: 60px;
-            background-color: #e0f7fa;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-          "
-        >
-          <i class="bi bi-egg-fried fs-3" style="color: #00acc1"></i>
+    <a href="/restaurants?cuisine=西餐" class="text-decoration-none">
+      <div class="card border-0 bg-light h-100 text-center category-card">
+        <div class="card-body py-4">
+          <div
+            class="mb-3 mx-auto category-icon"
+            style="
+              width: 60px;
+              height: 60px;
+              background-color: #e0f7fa;
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              transition: transform 0.3s ease;
+            "
+          >
+            <i class="bi bi-egg-fried fs-3" style="color: #00acc1"></i>
+          </div>
+          <h5 class="card-title">西餐</h5>
+          <p class="card-text small text-muted">异域风情，精致品味</p>
         </div>
-        <h5 class="card-title">特色早餐</h5>
-        <p class="card-text small text-muted">美好的一天从早餐开始</p>
       </div>
-    </div>
+    </a>
   </div>
   <div class="col-md-3 col-6 mb-4">
-    <div class="card border-0 bg-light h-100 text-center">
-      <div class="card-body py-4">
-        <div
-          class="mb-3 mx-auto"
-          style="
-            width: 60px;
-            height: 60px;
-            background-color: #fff3e0;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-          "
-        >
-          <i class="bi bi-shop fs-3" style="color: #ff9800"></i>
+    <a href="/restaurants?cuisine=烧烤" class="text-decoration-none">
+      <div class="card border-0 bg-light h-100 text-center category-card">
+        <div class="card-body py-4">
+          <div
+            class="mb-3 mx-auto category-icon"
+            style="
+              width: 60px;
+              height: 60px;
+              background-color: #fff3e0;
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              transition: transform 0.3s ease;
+            "
+          >
+            <i class="bi bi-fire fs-3" style="color: #ff9800"></i>
+          </div>
+          <h5 class="card-title">烧烤</h5>
+          <p class="card-text small text-muted">香气四溢的美味选择</p>
         </div>
-        <h5 class="card-title">特色餐厅</h5>
-        <p class="card-text small text-muted">独特环境与难忘体验</p>
       </div>
-    </div>
+    </a>
   </div>
   <div class="col-md-3 col-6 mb-4">
-    <div class="card border-0 bg-light h-100 text-center">
-      <div class="card-body py-4">
-        <div
-          class="mb-3 mx-auto"
-          style="
-            width: 60px;
-            height: 60px;
-            background-color: #e8f5e9;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-          "
-        >
-          <i class="bi bi-flower1 fs-3" style="color: #4caf50"></i>
+    <a href="/restaurants?cuisine=火锅" class="text-decoration-none">
+      <div class="card border-0 bg-light h-100 text-center category-card">
+        <div class="card-body py-4">
+          <div
+            class="mb-3 mx-auto category-icon"
+            style="
+              width: 60px;
+              height: 60px;
+              background-color: #e8f5e9;
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              transition: transform 0.3s ease;
+            "
+          >
+            <i class="bi bi-bucket fs-3" style="color: #4caf50"></i>
+          </div>
+          <h5 class="card-title">火锅</h5>
+          <p class="card-text small text-muted">热气腾腾，温暖共享</p>
         </div>
-        <h5 class="card-title">素食健康</h5>
-        <p class="card-text small text-muted">滋养身心的绿色选择</p>
       </div>
-    </div>
+    </a>
   </div>
 </div>
 
@@ -502,6 +529,25 @@
           "block";
       }
     }
+
+    // 分类卡片点击事件
+    document.querySelectorAll(".category-card").forEach((card) => {
+      card.addEventListener("click", function (e) {
+        // 防止a标签的默认跳转，这里我们手动处理
+        e.preventDefault();
+
+        // 获取父元素的a标签href
+        const href = this.parentElement.getAttribute("href");
+
+        // 添加点击动画效果
+        this.classList.add("active");
+
+        // 300ms后跳转，给动画效果留出时间
+        setTimeout(() => {
+          window.location.href = href;
+        }, 300);
+      });
+    });
 
     // 获取热门餐厅
     axios
