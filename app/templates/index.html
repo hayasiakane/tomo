@@ -1,7 +1,138 @@
 {% extends "base.html" %} {% block content %}
+<!-- 自定义 CSS -->
+<style>
+  /* 标题动画 */
+  @keyframes titlePulse {
+    0% {
+      transform: scale(1);
+      opacity: 0.9;
+    }
+    50% {
+      transform: scale(1.02);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 0.9;
+    }
+  }
+
+  /* 响应式标题调整 */
+  .hero-title-container {
+    margin-bottom: 1.8rem;
+    text-align: center;
+  }
+
+  .hero-tagline {
+    font-size: 2.2rem;
+    line-height: 1.3;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem;
+  }
+
+  .hero-tagline span {
+    display: inline-block;
+    animation: titlePulse 3s infinite;
+  }
+
+  .hero-tagline .second-part {
+    animation-delay: 1.5s;
+  }
+
+  /* 响应式调整 */
+  @media (max-width: 767.98px) {
+    .hero-tagline {
+      font-size: 1.8rem;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .hero-tagline span {
+      display: block;
+    }
+
+    .hero-tagline .second-part {
+      margin-top: 0.3rem;
+    }
+  }
+
+  @media (max-width: 575.98px) {
+    .hero-tagline {
+      font-size: 1.5rem;
+    }
+  }
+
+  /* 副标题样式 */
+  .hero-description {
+    opacity: 0.9;
+    line-height: 1.7;
+    margin-bottom: 2rem;
+  }
+
+  .subtitle-line {
+    margin-bottom: 0.5rem;
+  }
+
+  .subtitle-line:last-child {
+    margin-bottom: 0;
+  }
+
+  /* 按钮样式优化 */
+  .hero-buttons {
+    margin-top: 2rem;
+    display: flex;
+    justify-content: center;
+  }
+
+  .btn-discover {
+    padding: 0.7rem 1.8rem;
+    font-weight: 600;
+    border-radius: 50px;
+    transition: all 0.3s ease;
+    background-color: var(--primary-color);
+    border: none;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    letter-spacing: 0.5px;
+    font-size: 1.8rem;
+  }
+
+  .btn-discover:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    background-color: var(--primary-color-dark, #e67e22);
+  }
+
+  .btn-join {
+    padding: 0.7rem 1.8rem;
+    font-weight: 600;
+    border-radius: 50px;
+    transition: all 0.3s ease;
+    border: 1px solid #e0e0e0;
+    background-color: transparent;
+    letter-spacing: 0.5px;
+    font-size: 1.8rem;
+  }
+
+  .btn-join:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    background-color: #f8f9fa;
+  }
+
+  .food-icon {
+    display: inline-block;
+    margin-right: 8px;
+    position: relative;
+    top: -1px;
+  }
+</style>
+
 <!-- 主页英雄区域 -->
 <div
-  class="hero-section rounded-4 p-5 mb-5"
+  class="hero-section rounded-4 p-4 p-md-5 mb-5"
   style="
     background: linear-gradient(135deg, var(--light-accent) 0%, #fff8f0 100%);
   "
@@ -10,19 +141,22 @@
     <div class="col-md-6">
       <!-- 普通用户/未登录用户内容 -->
       <div id="regular-user-content">
-        <h1 class="hero-tagline">美食不止于味蕾，更是时光的记忆</h1>
-        <p class="hero-description">
-          与志同道合的食友一起，定格每一刻舌尖上的感动，留住每一段美味的故事
-        </p>
-        <div class="d-grid gap-3 d-md-flex mt-4">
-          <a href="/restaurants" class="btn btn-primary btn-lg px-4 me-md-2">
-            <i class="bi bi-search me-2"></i>发现美食
+        <div class="hero-title-container">
+          <h1 class="hero-tagline">
+            <span>美食不止于味蕾</span>
+            <span class="second-part">更是时光的记忆</span>
+          </h1>
+        </div>
+        <div class="hero-description text-center">
+          <div class="subtitle-line">与志同道合的食友一起</div>
+          <div class="subtitle-line">定格每一刻舌尖上的感动</div>
+          <div class="subtitle-line">留住每一段美味的故事</div>
+        </div>
+        <div class="hero-buttons">
+          <a href="/restaurants" class="btn btn-lg btn-discover me-3">
+            <span class="food-icon">🍽️</span>探索美食
           </a>
-          <a
-            href="/register"
-            class="btn btn-outline-secondary btn-lg px-4"
-            id="join-us-btn"
-          >
+          <a href="/register" class="btn btn-lg btn-join" id="join-us-btn">
             <i class="bi bi-person-plus me-2"></i>加入我们
           </a>
         </div>
@@ -30,33 +164,132 @@
 
       <!-- 商家用户内容 -->
       <div id="business-user-content" style="display: none">
-        <h1 class="hero-tagline">欢迎回到您的餐厅管理中心</h1>
-        <p class="hero-description">
+        <div class="hero-title-container">
+          <h1 class="hero-tagline">欢迎回到您的餐厅管理中心</h1>
+        </div>
+        <div class="hero-description text-center">
           管理您的餐厅信息，回复顾客评价，发布最新活动与优惠
-        </p>
-        <div class="d-grid gap-3 d-md-flex mt-4">
-          <a href="/my-restaurants" class="btn btn-primary btn-lg px-4 me-md-2">
+        </div>
+        <div class="hero-buttons">
+          <a href="/my-restaurants" class="btn btn-lg btn-discover me-3">
             <i class="bi bi-shop me-2"></i>我的餐厅
           </a>
-          <a
-            href="/restaurant/add"
-            class="btn btn-outline-secondary btn-lg px-4"
-          >
+          <a href="/restaurant/add" class="btn btn-lg btn-join">
             <i class="bi bi-plus-circle me-2"></i>添加餐厅
           </a>
         </div>
       </div>
     </div>
-    <div class="col-md-6">
-      <div class="position-relative">
-        <img
-          src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80"
-          class="img-fluid rounded-4 shadow-lg"
-          alt="餐厅图片"
-          style="height: 350px; object-fit: cover"
-        />
+    <div class="col-md-6 mt-4 mt-md-0">
+      <!-- 轮播图替换静态图片 -->
+      <div
+        id="restaurantCarousel"
+        class="carousel slide rounded-4 shadow-lg overflow-hidden"
+        data-bs-ride="carousel"
+      >
+        <div class="carousel-indicators">
+          <button
+            type="button"
+            data-bs-target="#restaurantCarousel"
+            data-bs-slide-to="0"
+            class="active"
+            aria-current="true"
+            aria-label="Slide 1"
+          ></button>
+          <button
+            type="button"
+            data-bs-target="#restaurantCarousel"
+            data-bs-slide-to="1"
+            aria-label="Slide 2"
+          ></button>
+          <button
+            type="button"
+            data-bs-target="#restaurantCarousel"
+            data-bs-slide-to="2"
+            aria-label="Slide 3"
+          ></button>
+        </div>
+        <div class="carousel-inner">
+          <div class="carousel-item active">
+            <img
+              src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80"
+              class="d-block w-100"
+              alt="精致餐厅"
+              style="height: 350px; object-fit: cover"
+            />
+            <div
+              class="carousel-caption d-none d-md-block"
+              style="
+                background: rgba(0, 0, 0, 0.5);
+                border-radius: 8px;
+                padding: 8px;
+              "
+            >
+              <h5 class="mb-0">精致餐厅体验</h5>
+              <p class="mb-0 small">享受高品质的用餐环境</p>
+            </div>
+          </div>
+          <div class="carousel-item">
+            <img
+              src="https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80"
+              class="d-block w-100"
+              alt="美味佳肴"
+              style="height: 350px; object-fit: cover"
+            />
+            <div
+              class="carousel-caption d-none d-md-block"
+              style="
+                background: rgba(0, 0, 0, 0.5);
+                border-radius: 8px;
+                padding: 8px;
+              "
+            >
+              <h5 class="mb-0">美味佳肴</h5>
+              <p class="mb-0 small">发现城市里的味蕾惊喜</p>
+            </div>
+          </div>
+          <div class="carousel-item">
+            <img
+              src="https://images.unsplash.com/photo-1559339352-11d035aa65de?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1074&q=80"
+              class="d-block w-100"
+              alt="甜点饮品"
+              style="height: 350px; object-fit: cover"
+            />
+            <div
+              class="carousel-caption d-none d-md-block"
+              style="
+                background: rgba(0, 0, 0, 0.5);
+                border-radius: 8px;
+                padding: 8px;
+              "
+            >
+              <h5 class="mb-0">精致甜点</h5>
+              <p class="mb-0 small">结束一餐的完美方式</p>
+            </div>
+          </div>
+        </div>
+        <button
+          class="carousel-control-prev"
+          type="button"
+          data-bs-target="#restaurantCarousel"
+          data-bs-slide="prev"
+        >
+          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Previous</span>
+        </button>
+        <button
+          class="carousel-control-next"
+          type="button"
+          data-bs-target="#restaurantCarousel"
+          data-bs-slide="next"
+        >
+          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Next</span>
+        </button>
+
+        <!-- 用户推荐标签 -->
         <div
-          class="position-absolute top-0 end-0 bg-white rounded-pill py-2 px-3 m-3 shadow-sm d-none d-md-flex align-items-center"
+          class="position-absolute top-0 end-0 bg-white rounded-pill py-2 px-3 m-3 shadow-sm d-flex align-items-center"
         >
           <i class="bi bi-heart-fill text-danger me-2"></i>
           <span class="fw-bold">用户推荐</span>
@@ -238,6 +471,17 @@
 </div>
 {% endblock %} {% block scripts %}
 <script>
+  // 添加标题呼吸效果的CSS
+  const styleSheet = document.createElement("style");
+  styleSheet.textContent = `
+    @keyframes titlePulse {
+      0% { opacity: 0.9; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.02); }
+      100% { opacity: 0.9; transform: scale(1); }
+    }
+  `;
+  document.head.appendChild(styleSheet);
+
   document.addEventListener("DOMContentLoaded", function () {
     // 检查登录状态并根据用户类型显示不同内容
     const token = localStorage.getItem("token");
@@ -404,10 +648,10 @@
   // 生成示例餐厅数据
   function generateDemoRestaurants() {
     const restaurants = [
-      { name: "江南风味馆", cuisine: "江浙菜", location: "市中心" },
-      { name: "川香阁", cuisine: "川菜", location: "西湖区" },
-      { name: "味之町日料", cuisine: "日本料理", location: "滨江区" },
-      { name: "地中海餐厅", cuisine: "西餐", location: "拱墅区" },
+      { name: "江南风味馆", cuisine: "江浙菜", location: "徐汇区" },
+      { name: "川湘阁", cuisine: "川菜", location: "嘉定区" },
+      { name: "味之町日料", cuisine: "日本料理", location: "黄浦区" },
+      { name: "地中海餐厅", cuisine: "西餐", location: "浦东新区" },
     ];
 
     let html = "";
@@ -465,7 +709,7 @@
       },
       {
         user: { name: "吃货李小姐" },
-        restaurant: { name: "川香阁" },
+        restaurant: { name: "川湘阁" },
         content:
           "麻辣鲜香的川菜，正宗的味道!麻婆豆腐和水煮鱼都非常地道，价格也很实惠。",
         rating: 4,
