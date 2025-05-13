@@ -380,10 +380,10 @@ block content %}
         );
 
         // 保存登录状态
-        localStorage.setItem("token", response.data.token);
         localStorage.setItem("userId", response.data.userId);
         localStorage.setItem("username", response.data.name);
         localStorage.setItem("type", response.data.type);
+        localStorage.setItem("token", response.data.token);
 
         // 显示成功消息
         const successMsg = document.createElement("div");

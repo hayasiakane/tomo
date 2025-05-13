@@ -10,9 +10,9 @@ def index():
 def restaurant_list():
     return render_template('restaurant/restaurants.html')
 
-@main_bp.route('/restaurants/<restaurant_id>')
-def restaurant_detail(restaurant_id):
-    return render_template('restaurant/detail.html', restaurant_id=restaurant_id)
+# @main_bp.route('/restaurants/<restaurant_id>')
+# def restaurant_detail(restaurant_id):
+#     return render_template('restaurant/detail.html', restaurant_id=restaurant_id)
 
 @main_bp.route('/restaurants/add')
 def restaurant_add():

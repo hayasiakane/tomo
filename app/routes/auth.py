@@ -82,7 +82,10 @@ def api_register():
             return jsonify({"error": "User creation failed"}), 500
         return jsonify({
             "message": "Registration successful",
-            "user_id": user_data['userId'],
+            "userId": user_data['userId'],
+            "username": user_data['name'],
+            "type": user_data['type'],
+            "token": "模拟Token",  # 生产环境替换为真实JWT
         }), 201
         
     except Exception as e:
