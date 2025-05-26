@@ -21,7 +21,8 @@ def create_app(config_class=Config):
     
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp, url_prefix='/auth')
-    app.register_blueprint(user_bp, url_prefix='/user')
+    #app.register_blueprint(user_bp, url_prefix='/user')
+    app.register_blueprint(user_bp)
     app.register_blueprint(restaurant_bp, url_prefix='/api/restaurants')
     app.register_blueprint(review_bp, url_prefix='/api/reviews')
 

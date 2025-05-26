@@ -221,7 +221,7 @@ block content %}
           // 保存登录状态
           localStorage.setItem("token", response.data.token);
           localStorage.setItem("userId", response.data.userId);
-          localStorage.setItem("username", response.data.name);
+          localStorage.setItem("username", response.data.name|| response.data.userId);
           localStorage.setItem("type", response.data.type);
 
           // 显示成功消息

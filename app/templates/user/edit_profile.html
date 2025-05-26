@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+{% block title %}编辑资料 - TOMO食光{% endblock %}
+
+{% block content %}
+<style>
+  body {
+    background-color: #fef1e3;
+  }
+
+  .edit-card {
+    background: #ffa726;
+    border-radius: 8px;
+    padding: 30px;
+    max-width: 600px;
+    margin: 0 auto 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    color: #fff;
+  }
+
+  .edit-card h3 {
+    margin-bottom: 24px;
+    color: #fff;
+  }
+
+  .form-label {
+    color: #fff;
+  }
+
+  .form-control, .form-select {
+    border: 1px solid #ffffff;
+    background: #fff;
+    color: #333;
+  }
+
+  .form-control::placeholder {
+    color: #999;
+  }
+
+  .form-control:focus, .form-select:focus {
+    border-color: #fff;
+    box-shadow: none;
+  }
+
+  .btn-save {
+    background-color: #fef1e3;
+    font-weight: bold;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 6px;
+  }
+
+  .btn-save:hover {
+    background: #ffe6e0;
+  }
+
+  .form-text {
+    color: rgba(255,255,255,0.8);
+  }
+
+  input[readonly], .readonly-box {
+    border: none;
+    background: transparent;
+    color: #fff;
+    padding-left: 0;
+    font-size: 0.95rem;
+  }
+</style>
+
+<div class="container py-5">
+  <div class="edit-card">
+    <h3 class="text-center">编辑个人资料</h3>
+    <form id="profileForm">
+      <div class="mb-3">
+        <label for="inputName" class="form-label">昵称</label>
+        <input type="text" class="form-control" id="inputName" placeholder="请输入昵称">
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">邮箱</label>
+        <div id="inputEmail" class="readonly-box">(未设置)</div>
+      </div>
+
+      <div class="mb-3">
+        <label for="inputJoined" class="form-label">加入时间</label>
+        <input type="text" id="inputJoined" readonly class="form-control">
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">偏好标签</label>
+        <select multiple class="form-select" id="selectTags">
+          <option>🍰 甜品</option>
+          <option>☕️ 咖啡</option>
+          <option>🥘 火锅</option>
+          <option>🍜 面条</option>
+          <option>🍣 寿司</option>
+          <option>🍔 汉堡</option>
+        </select>
+        <div class="form-text">按住 Ctrl 或 Command 多选</div>
+      </div>
+
+      <div class="d-flex justify-content-end mt-4">
+        <button type="submit" class="btn btn-save">保存修改</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const userId = localStorage.getItem("userId");
+  if (!userId) return window.location.href = "/login";
+
+  const profileKey = `profileData_${userId}`;
+  const joinedKey = `joined_${userId}`;
+  const nameKey = `username_${userId}`;
+
+  const localData = JSON.parse(localStorage.getItem(profileKey) || '{}');
+  const joined = localStorage.getItem(joinedKey) || new Date().toISOString().split("T")[0];
+  document.getElementById("inputJoined").value = joined;
+  document.getElementById("inputName").value = localData.name || localStorage.getItem(nameKey) || "";
+
+  const select = document.getElementById("selectTags");
+  const savedTags = localData.tags || ["🍰 甜品"];
+  Array.from(select.options).forEach(opt => {
+    if (savedTags.includes(opt.text)) opt.selected = true;
+  });
+
+  axios.get(`/api/users/${userId}`).then(res => {
+    const user = res.data;
+    const email = user.email || "（未设置）";
+    document.getElementById("inputEmail").textContent = email;
+    localStorage.setItem(`email_${userId}`, email);
+  });
+
+  document.getElementById("profileForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    const name = document.getElementById("inputName").value.trim();
+    const tags = Array.from(select.selectedOptions).map(opt => opt.text);
+    const email = localStorage.getItem(`email_${userId}`) || "（未设置）";
+
+    const updated = { name, email, joined, tags };
+    localStorage.setItem(profileKey, JSON.stringify(updated));
+    localStorage.setItem(nameKey, name);
+    localStorage.setItem(joinedKey, joined);
+
+    // ✅ 新增：同步更新昵称到数据库
+    axios.put("/api/users/update", {
+      userId: userId,
+      name: name
+    }).then(() => {
+      window.location.href = "/profile.html"; // 成功后跳转
+    }).catch(err => {
+      alert("修改失败：" + (err.response?.data?.error || err.message));
+    });
+  });
+});
+</script>
+{% endblock %}

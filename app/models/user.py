@@ -267,37 +267,21 @@ class User:
                 current_app.logger.info(f"Updated user image: {user_id} at {save_images[0]}")
             return True, None
         except Exception as e:
+            return False, str(e)
             if log_flag:
                 current_app.logger.error(f"Failed to update user image: {user_id} - {str(e)}")
-            return False, str(e)
         finally:
             db.close()
 
-# @classmethod
-# def get_by_id(cls, user_id):
-#     try:
-#         gremlin_client = client.Client('ws://localhost:8182/gremlin', 'g')
-        
-#         query = """
-#         g.V()
-#          .has('user', 'user_id', user_id)
-#          .project('user_id', 'name', 'email', 'type', 'created_at', 'last_login')
-#          .by(values('user_id'))
-#          .by(values('name'))
-#          .by(values('email'))
-#          .by(values('type'))
-#          .by(values('created_at'))
-#          .by(coalesce(values('last_login'), constant(null)))
-#         """
-#         result = gremlin_client.submit(query, {'user_id': user_id}).all().result()
-        
-#         if not result:
-#             return None
-            
-#         return result[0]
-        
-#     except Exception as e:
-#         raise e
-#     finally:
-#         gremlin_client.close()
-    
+
+    def update_name(user_id, new_name):
+        """更新用户昵称"""
+        try:
+            db.g.V().has('user', 'userId', user_id) \
+                  .property('name', new_name) \
+                  .next()
+            return True, None
+        except Exception as e:
+            return False, str(e)
+        finally:
+            db.close()

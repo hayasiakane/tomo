@@ -2,6 +2,7 @@ from flask import Blueprint, render_template
 
 main_bp = Blueprint('main', __name__)
 
+
 @main_bp.route('/')
 def index():
     return render_template('index.html')
@@ -21,3 +22,15 @@ def restaurant_add():
 @main_bp.route('/my-reviews')
 def myreviews():
     return render_template('review/myreview.html')
+
+@main_bp.route('/profile.html')
+def profile_page():
+    return render_template('user/profile.html')
+
+@main_bp.route('/friends.html')
+def friends_page():
+    return render_template('user/friends.html')
+
+@main_bp.route('/edit_profile.html')
+def edit_profile_page():
+    return render_template('user/edit_profile.html')
