@@ -5,7 +5,7 @@ import os
 parent_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 # 将父目录添加到 sys.path
 sys.path.append(parent_dir)
-print(f"Parent directory: {parent_dir}")
+#print(f"Parent directory: {parent_dir}")
 
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from gremlin_python.driver import client  # 添加这行

@@ -11,18 +11,23 @@ from app.models.user import User
 from app.models.restaurant import Restaurant
 from gremlin_python.process.graph_traversal import __
 from app.models.review import Review
+from werkzeug.datastructures import FileStorage
 #测试注册用户
 
 create=1
-
+test_images =  [FileStorage(
+                stream=open('./app/static/images/friends-dining.jpg', 'rb'),
+                filename='test1.jpg')]
+            
+files = {'images': test_images}
 test_user_name=['test_user','test_user1','test_user2','test_user3']
-test_user_email=['123@123.com','124@124.com','125@125.com','126@126.com']
+test_user_email=['145@123.com','124@124.com','125@125.com','126@126.com']
 test_user_password=['123456','123456','123456','123456']
 test_user_type=['business','business','business','business']
 def test_reg():
     # 测试注册用户
     user_ids = []
-    for i in range(4):
+    for i in range(1):
         data = {
             'name': test_user_name[i],
             'email': test_user_email[i],
@@ -54,7 +59,7 @@ if create:
 # else:
 #     print("创建用户失败:", error)
 
-test_name=['test_restaurant','test_restaurant1','test_restaurant2','test_restaurant3']
+test_name=['test_restaurant33','test_restaurant1','test_restaurant2','test_restaurant3']
 test_address=['123 Test St','456 Test Ave','789 Test Blvd','101 Test Rd']
 test_cusine=['Italian','Chinese','Mexican','Indian']
 test_description=['A test restaurant','A test restaurant1','A test restaurant2','A test restaurant3']
@@ -62,7 +67,7 @@ test_description=['A test restaurant','A test restaurant1','A test restaurant2',
 #餐厅创建测试函数
 def test_create_restaurant():
     res_id=[]
-    for i in range(4):
+    for i in range(1):
         data = {
             'name': test_name[i],
             'address': test_address[i],
@@ -85,16 +90,7 @@ def test_create_restaurant():
             res_id.append(restaurant_id)
     return res_id
 
-#计算内层字典个数
-def count_inner_dicts(d):
-    count = 0
-    # for value in d.values():
-    #     if isinstance(value, list):  # 如果当前值是字典
-    #         count += 1              # 计数 +1
-    #         count += count_inner_dicts(value)  # 递归统计子字典
-    for item in d:
-        count+=1
-    return count
+
 
 #建立边失败的话，即使建立了餐厅的点，最后也不会返回餐厅的id
 if create:
@@ -127,7 +123,7 @@ re_id=[]
     # user_id = id[i]  
     # restaurant_id = res_id[i]  
     # 添加评论
-review_id, error = Review.create(id[0], res_id[0], review_data['content'], review_data['rating'])
+review_id, error = Review.create(id[0], res_id[0], review_data['content'], review_data['rating'], files)
 if error:
     print("Error:", error)
 else:
@@ -146,8 +142,54 @@ if error:
     print("Error:", error)
 else:
     for i in range(len(user_re)):
-        print("User reviews:",user_re[i]['content'])
-        print("reply:",user_re[i]['reply']['content'])
+        print("User reviews:",user_re[i])
+
+#置顶测试
+# pin=Review.Pin(review_id)
+# if pin:
+#     print("Review pinned successfully")
+
+# user_re2,error=Review.get_by_restaurant(res_id[0])
+# if error:
+#     print("Error:", error)
+# else:
+#     for i in range(len(user_re2)):
+#         print("User reviews after pin:",user_re2[i])
+
+
+# pin=Review.Pin(review_id)
+# if  pin:
+#     print("Review unpinned successfully")
+
+# user_re3,error=Review.get_by_restaurant(res_id[0])
+# if error:
+#     print("Error:", error)
+# else:
+#     for i in range(len(user_re3)):
+#         print("User reviews after unpin:",user_re3[i])
+
+#点赞测试
+like=Review.Like(review_id)
+if( like):
+    print("Review liked successfully")
+
+user_re4,error=Review.get_by_restaurant(res_id[0])
+if error:
+    print("Error:", error)
+else:
+    for i in range(len(user_re4)):
+        print("User reviews after like:",user_re4[i])
+
+dislike=Review.dislike(review_id)
+if( dislike):
+    print("Review disliked successfully")
+
+user_re5,error=Review.get_by_restaurant(res_id[0])
+if error:
+    print("Error:", error)
+else:
+    for i in range(len(user_re5)):
+        print("User reviews after dislike:",user_re5[i])
 
 Review.delete(review_id)
 # data,error=Restaurant.get('name','test_restaurant')

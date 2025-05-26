@@ -1,5 +1,6 @@
-from . import db
+from app.models import db
 import uuid
+import sys
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from gremlin_python.driver import client  # 添加这行
 from werkzeug.security import generate_password_hash  # 密码加密需要
@@ -7,9 +8,17 @@ from werkzeug.security import check_password_hash   # 密码验证需要
 import os
 import datetime
 from gremlin_python.process.graph_traversal import __ 
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+log_flag = False  # 是否开启日志记录
+if log_flag:
+    from flask import current_app  
+
+
+
 class User:
     @staticmethod
-    def register(name, email, password, user_type="regular"): # 默认用户类型为普通用户
+    def register(name, email, password, user_type="regular",files=None): # 默认用户类型为普通用户
         """注册新用户"""
         try:
             # 初始化Gremlin客户端（根据你的配置调整）
@@ -25,15 +34,23 @@ class User:
             hashed_pw = generate_password_hash(password)
 
             # 创建用户顶点
-            db.g.addV('user') \
+            user=db.g.addV('user') \
               .property('userId', user_id) \
               .property('name', name) \
               .property('email', email) \
               .property('password', hashed_pw) \
+              .property('image', []) \
               .property('type', user_type) \
               .property('createdAt', datetime.datetime.now().isoformat()) \
               .next()
             
+            saved_images = []
+            if files:
+                from utils.file_utils import save_user_images  # 延迟导入避免循环依赖
+                saved_images = save_user_images(user_id, files)
+                # 更新顶点属性
+                db.g.V(user).property('images', saved_images).next()
+
             return user_id, None
         except Exception as e:
             return None, str(e)
@@ -46,7 +63,7 @@ class User:
             # 查询用户数据（参数化查询）
             results = db.g.V()\
                 .has('user', 'email', email)\
-                .valueMap('userId', 'name', 'email', 'type', 'password')\
+                .valueMap('userId', 'name', 'email', 'image','type', 'password')\
                 .toList()
                 
             if not results:
@@ -67,6 +84,7 @@ class User:
                 'user_id': user_data['userId'][0] if 'userId' in user_data else None,
                 'name': user_data['name'][0] if 'name' in user_data else None,
                 'email': user_data['email'][0] if 'email' in user_data else None,
+                'images': user_data['image'][0] if 'image' in user_data else [],
                 'type': user_data['type'][0] if 'type' in user_data else None,
             }, None 
     
@@ -86,6 +104,7 @@ class User:
                 'userId': user['userId'][0],
                 'name': user['name'][0],
                 'email': user['email'][0],
+                'images': user['image'][0] if 'image' in user else [],
                 'type': user['type'][0],
                 'createdAt': user['createdAt'][0]
             }, None
@@ -105,6 +124,7 @@ class User:
                 'userId': user['userId'][0],
                 'name': user['name'][0],
                 'email': user['email'][0],
+                'images': user['image'][0] if 'image' in user else [],
                 'type': user['type'][0],
                 'createdAt': user['createdAt'][0]
             }, None
@@ -124,6 +144,7 @@ class User:
                 'userId': user['userId'][0],
                 'name': user['name'][0],
                 'email': user['email'][0],
+                'images': user['image'][0] if 'image' in user else [],
                 'type': user['type'][0],
                 'createdAt': user['createdAt'][0]
             }, None
@@ -143,6 +164,7 @@ class User:
                 'userId': user['userId'][0],
                 'name': user['name'][0],
                 'email': user['email'][0],
+                'images': user['image'][0] if 'image' in user else [],
                 'type': user['type'][0],
                 'createdAt': user['createdAt'][0]
             }, None
@@ -223,6 +245,31 @@ class User:
             return True  # 删除成功
         except Exception as e:
             return  str(e)
+        finally:
+            db.close()
+
+    @staticmethod
+    def update_image(user_id, image):
+        """修改用户头像"""
+        try:
+            save_images=[]
+            if image:
+                from utils.file_utils import save_user_images,delete_user_images  # 延迟导入避免循环依赖
+                # 保存图片
+                delete_user_images(user_id)  # 删除旧图片   
+                save_images=save_user_images(user_id, image)
+
+            # 更新顶点属性
+            db.g.V().has('user', 'userId', user_id) \
+                   .property('image', save_images) \
+                   .next()
+            if log_flag:
+                current_app.logger.info(f"Updated user image: {user_id} at {save_images[0]}")
+            return True, None
+        except Exception as e:
+            if log_flag:
+                current_app.logger.error(f"Failed to update user image: {user_id} - {str(e)}")
+            return False, str(e)
         finally:
             db.close()
 

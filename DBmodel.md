@@ -8,8 +8,11 @@
     . name   （用户名）
     . email  （邮箱）
     . password  （密码） <br>正常传递数字密码就行，哈希加密已在数据模型中实现</br>
+    . image :头像:一个存放头像图片的文件名，一般就只有一个元素
     . type "regular:普通用户； business:经营者"
     . createdAt (创建时间)  <br>自动添加，不需要管</br>
+    . <br>以下涉及用户数据返回的，都加入一个image</br>
+
 
 2. 函数
     1. 导入类
@@ -17,7 +20,7 @@
 
     2. 注册函数:register
         1. 语句：
-            `User.register(name,email,password,user_type) #userid已在函数内自动生成，user_type用网页提交的`
+            `User.register(name,email,password,user_type,image) #userid已在函数内自动生成，user_type用网页提交的`
         2. 作用：
             . 实现注册
         3. 返回内容
@@ -114,7 +117,11 @@
         1. 语句
             `User.delete(attribute, value)`
         2. 返回内容：布尔值
-    
+
+    12. 更新头像:update_image(user_id,image)
+        1. 语句
+            `User.update_image(user_id,image)`
+        2. 返回内容：布尔值
 
 ### restaurant
 1. 属性
@@ -123,7 +130,9 @@
     3. address (餐厅地址)
     4. cuisine (菜系)
     5. description (餐厅描述)
-    6. createdAt (添加时间) <br>自动添加，不需要管</br>
+    6. images:包含图片文件名的列表
+    7. createdAt (添加时间) <br>自动添加，不需要管</br>
+    8. 以下有关返回餐厅信息的，都加入了image属性，支持显示图片了
 
 2. 函数
     1. 导入类
@@ -235,6 +244,18 @@
         except Exception as e:
             return None, str(e)
         ```
+    
+    8. 添加图片：add_image()
+        1. 语句
+        `Restaurant.add_images(restaurant_id,files)`
+        2. 返回：布尔值
+    
+    9. 删除所有照片：delete_all_image()
+        1. 语句
+        `Restaurant.delete_all_images(restaurant_id)`
+    10. 删除单张照片：delete_image()
+        1. 语句
+        `Restaurant.delete__image(restaurant_id,fielname)`
 
 ### Friendship
 1. 导入类
@@ -275,7 +296,10 @@
     1. reviewId:评论id，自动建立，不需要管
     2. content:评论内容
     3. rating:评分(规定在1-5之间)
-    4. createdAt:创建时间，自动获取，不需要管
+    4. pin:是否置顶的标志，布尔值
+    5. like:点赞数
+    6. images:包含评论图片的地址，列表
+    7. createdAt:创建时间，自动获取，不需要管
 
 2. 函数
     1. 导入类
@@ -354,3 +378,38 @@
         2. 作用：删除评论及相关回复
         
         3. 返回：布尔值
+
+    7. 添加图片
+        1. 语句
+        `Review.add_images(review_id,files)`
+
+        2. 返回：添加后的图片路劲列表
+    
+    8. 置顶函数
+        1. 语句
+        `Review.pin(review_id)`
+
+        2. 返回：布尔值
+
+    9. 点赞函数
+        1. 语句
+        `Review.Like(review_id)`
+
+        2. 返回：返回新的点赞数，一次只能加1
+    
+
+    10. 获取点赞数
+        1. 语句
+        `Review.get_like(review_id)`
+
+        2. 返回：点赞数
+    
+    11. 取消点赞：dislike()
+        1. 语句
+        `Review.disike(review_id)`
+
+        2. 返回：返回新的点赞数，一次只能加1
+    
+
+
+        
