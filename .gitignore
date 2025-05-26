@@ -1,5 +1,8 @@
 docker-compose.yml
 Dockerfile.gremlin
 Dockerfile
-gremlin-server.yaml
-tinkergraph-empty.properties
+login.bat
+类大众点评项目.pptx
+__pycache__/
+*.py[c|o]
+venv/

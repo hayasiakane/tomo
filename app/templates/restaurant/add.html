@@ -103,12 +103,15 @@ document.addEventListener('DOMContentLoaded', function() {
         axios.post('/api/restaurants', formData, {
             headers: {
                 'X-User-ID': userId,
-                'Authorization': `Bearer ${token}`
+            //    'Authorization': `Bearer ${token}`
             }
         })
         .then(response => {
             alert('餐厅添加成功！');
-            window.location.href = `/restaurants/${response.data.restaurantId}`;
+            console.log("API 返回数据:", response.data); // 检查返回的数据结构
+            const restaurantId = response.data.restaurantId;
+            window.location.href = `/restaurants/${restaurantId}`;
+            //window.location.href = `/restaurants/detail`;
         })
         .catch(error => {
             console.error('添加餐厅失败:', error);

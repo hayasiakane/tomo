@@ -1,3 +1,12 @@
+import sys
+import os
+
+# 获取 app 目录的父目录
+parent_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# 将父目录添加到 sys.path
+sys.path.append(parent_dir)
+print(f"Parent directory: {parent_dir}")
+
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from gremlin_python.driver import client  # 添加这行
 from werkzeug.security import generate_password_hash,check_password_hash  # 密码加密需要
@@ -35,7 +44,8 @@ def api_login():
         "message": "登录成功",
         "userId": user['user_id'],
         "name": user['name'],
-        "token": "模拟Token"  # 生产环境替换为真实JWT
+        "token": "模拟Token",  # 生产环境替换为真实JWT
+        "type": user['type']
     }), 200
 
 @auth_bp.route('/register', methods=['GET'])
@@ -49,7 +59,7 @@ def api_register():
         return jsonify({"error": "Unsupported Media Type: Content-Type must be application/json"}), 415
     
     data = request.get_json()
-    
+
     # 必填字段验证
     required_fields = ['name', 'email', 'password']
     if not all(field in data for field in required_fields):
@@ -59,39 +69,23 @@ def api_register():
         # 初始化Gremlin连接
         gremlin_client = client.Client('ws://localhost:8182/gremlin', 'g')
         
-        # 1. 检查邮箱是否已存在
-        email_check = "g.V().has('user', 'email', email).count()"
-        result = gremlin_client.submit(email_check, {'email': data['email']}).all().result()
         
-        if result[0] > 0:
-            return jsonify({"error": "Email already exists"}), 400
+        # #hashed_pw = generate_password_hash(data['password'])
+        # #user_id = str(uuid.uuid4())  # 生成唯一ID
+        # if result[0] > 0:
+        #     return jsonify({"error": "Email already exists"}), 400
         
-        # 2. 创建新用户
-        user_id = str(uuid.uuid4())
-        hashed_pw = data['password']
-        
-        create_query = """
-        g.addV('user')
-         .property('user_id', user_id)
-         .property('name', name)
-         .property('email', email)
-         .property('password', password)
-         .property('type', type)
-         .property('created_at', created_at)
-        """
-        
-        gremlin_client.submit(create_query, {
-            'user_id': user_id,
-            'name': data['name'],
-            'email': data['email'],
-            'password': hashed_pw,
-            'type': data.get('type', 'regular'),
-            'created_at': datetime.utcnow().isoformat() + 'Z'
-        }).all().result()
-        
+        User.register(data['name'], data['email'], data['password'], data.get('type', 'regular'))
+        # 执行创建用户的Gremlin查询
+        user_data,error = User.get_by_email(data['email'])
+        if error:
+            return jsonify({"error": "User creation failed"}), 500
         return jsonify({
             "message": "Registration successful",
-            "user_id": user_id
+            "userId": user_data['userId'],
+            "username": user_data['name'],
+            "type": user_data['type'],
+            "token": "模拟Token",  # 生产环境替换为真实JWT
         }), 201
         
     except Exception as e:

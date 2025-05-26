@@ -1,73 +1,263 @@
-{% extends "base.html" %}
-
-{% block title %}登录 - 美食点评网{% endblock %}
-
-{% block content %}
+{% extends "base.html" %} {% block title %}登录 - TOMO食光{% endblock %} {%
+block content %}
 <div class="row justify-content-center">
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-body p-5">
-                <h2 class="card-title text-center mb-4">登录</h2>
-                
-                <form id="login-form">
-                    <div class="mb-3">
-                        <label for="email" class="form-label">电子邮箱</label>
-                        <input type="email" class="form-control" id="email" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="password" class="form-label">密码</label>
-                        <input type="password" class="form-control" id="password" required>
-                    </div>
-                    <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-primary">登录</button>
-                    </div>
-                </form>
-                
-                <div class="text-center mt-3">
-                    <p>还没有账号？<a href="/register">立即注册</a></p>
-                    <p><a href="/forgot-password">忘记密码？</a></p>
-                </div>
-            </div>
-        </div>
+  <div class="col-md-6">
+    <div class="text-center mb-4">
+      <div
+        style="
+          width: 80px;
+          height: 80px;
+          margin: 0 auto 20px;
+          background-color: var(--light-accent);
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        "
+      >
+        <i
+          class="bi bi-cup-hot-fill"
+          style="font-size: 40px; color: var(--primary-color)"
+        ></i>
+      </div>
+      <h1 class="h3 mb-3 fw-bold">欢迎回到TOMO食光</h1>
+      <p class="text-muted">登录您的账号，继续探索美食时光</p>
     </div>
-</div>
-{% endblock %}
+    <div class="card shadow-sm border-0">
+      <div class="card-body p-4 p-md-5">
+        <form id="login-form">
+          <div class="mb-4">
+            <label for="email" class="form-label">电子邮箱</label>
+            <div class="input-group">
+              <span
+                class="input-group-text"
+                style="
+                  background-color: var(--light-accent);
+                  border-color: var(--border-color);
+                "
+              >
+                <i
+                  class="bi bi-envelope"
+                  style="color: var(--secondary-color)"
+                ></i>
+              </span>
+              <input
+                type="email"
+                class="form-control"
+                id="email"
+                placeholder="请输入您的邮箱"
+                required
+              />
+            </div>
+            <div class="invalid-feedback" id="email-feedback"></div>
+          </div>
 
-{% block scripts %}
+          <div class="mb-4">
+            <div class="d-flex justify-content-between align-items-center">
+              <label for="password" class="form-label">密码</label>
+              <a
+                href="/forgot-password"
+                class="small text-decoration-none"
+                style="color: var(--secondary-color)"
+                >忘记密码？</a
+              >
+            </div>
+            <div class="input-group">
+              <span
+                class="input-group-text"
+                style="
+                  background-color: var(--light-accent);
+                  border-color: var(--border-color);
+                "
+              >
+                <i class="bi bi-lock" style="color: var(--secondary-color)"></i>
+              </span>
+              <input
+                type="password"
+                class="form-control"
+                id="password"
+                placeholder="请输入密码"
+                required
+              />
+              <button
+                class="btn btn-outline-secondary"
+                type="button"
+                id="toggle-password"
+                style="border-color: var(--border-color)"
+              >
+                <i class="bi bi-eye"></i>
+              </button>
+            </div>
+            <div class="invalid-feedback" id="password-feedback"></div>
+          </div>
+
+          <div class="mb-4 form-check">
+            <input type="checkbox" class="form-check-input" id="remember-me" />
+            <label class="form-check-label" for="remember-me">记住我</label>
+          </div>
+
+          <div class="d-grid gap-2">
+            <button
+              type="submit"
+              class="btn btn-primary btn-lg"
+              id="login-button"
+              style="
+                background-color: var(--primary-color);
+                border-color: var(--primary-color);
+              "
+            >
+              <span
+                class="spinner-border spinner-border-sm d-none me-2"
+                id="login-spinner"
+              ></span>
+              登录
+            </button>
+          </div>
+
+          <div class="alert alert-danger mt-3 d-none" id="login-error"></div>
+        </form>
+
+        <div class="text-center mt-4">
+          <p>
+            还没有账号？<a
+              href="/register"
+              class="text-decoration-none fw-semibold"
+              style="color: var(--secondary-color)"
+              >立即注册</a
+            >
+          </p>
+        </div>
+
+        <div class="text-center mt-3">
+          <p class="small text-muted">
+            登录即表示您同意
+            <a href="#" style="color: var(--secondary-color)">服务条款</a> 和
+            <a href="#" style="color: var(--secondary-color)">隐私政策</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block scripts %}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener("DOMContentLoaded", function () {
     // 检查是否已登录
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     if (token) {
-        window.location.href = '/';
+      window.location.href = "/";
     }
-    
-    // 处理登录表单提交
-    document.getElementById('login-form').addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
-        
-        axios.post('/api/users/login', {
-    email: document.getElementById('email').value,
-    password: document.getElementById('password').value
-}, {
-    headers: {
-        'Content-Type': 'application/json'
-    }
-})
-.then(response => {
-    // 保存登录状态
-    localStorage.setItem('token', response.data.token);
-    localStorage.setItem('userId', response.data.userId);
-    window.location.href = '/';  // 跳转到首页
-})
-.catch(error => {
-    console.error('登录失败详情:', error.response);
-    alert(error.response?.data?.error || '登录失败');
-});
+
+    // 显示/隐藏密码
+    const togglePassword = document.getElementById("toggle-password");
+    const passwordInput = document.getElementById("password");
+
+    togglePassword.addEventListener("click", function () {
+      const type =
+        passwordInput.getAttribute("type") === "password" ? "text" : "password";
+      passwordInput.setAttribute("type", type);
+      this.querySelector("i").classList.toggle("bi-eye");
+      this.querySelector("i").classList.toggle("bi-eye-slash");
     });
-});
+
+    // 处理登录表单提交
+    const loginForm = document.getElementById("login-form");
+    const loginButton = document.getElementById("login-button");
+    const loginSpinner = document.getElementById("login-spinner");
+    const loginError = document.getElementById("login-error");
+
+    loginForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      // 验证表单
+      let valid = true;
+
+      const email = document.getElementById("email");
+      const password = document.getElementById("password");
+
+      if (!email.value.trim()) {
+        email.classList.add("is-invalid");
+        document.getElementById("email-feedback").textContent = "请输入邮箱";
+        valid = false;
+      } else if (!/\S+@\S+\.\S+/.test(email.value)) {
+        email.classList.add("is-invalid");
+        document.getElementById("email-feedback").textContent =
+          "请输入有效的邮箱地址";
+        valid = false;
+      } else {
+        email.classList.remove("is-invalid");
+      }
+
+      if (!password.value) {
+        password.classList.add("is-invalid");
+        document.getElementById("password-feedback").textContent = "请输入密码";
+        valid = false;
+      } else {
+        password.classList.remove("is-invalid");
+      }
+
+      if (!valid) return;
+
+      // 显示加载状态
+      loginButton.disabled = true;
+      loginSpinner.classList.remove("d-none");
+      loginError.classList.add("d-none");
+
+      // 发送请求
+      axios
+        .post(
+          "/api/users/login",
+          {
+            email: email.value,
+            password: password.value,
+          },
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        )
+        .then((response) => {
+          // 保存登录状态
+          localStorage.setItem("token", response.data.token);
+          localStorage.setItem("userId", response.data.userId);
+          localStorage.setItem("username", response.data.name|| response.data.userId);
+          localStorage.setItem("type", response.data.type);
+
+          // 显示成功消息
+          const successMsg = document.createElement("div");
+          successMsg.className = "alert alert-success text-center";
+          successMsg.innerHTML =
+            '<i class="bi bi-check-circle-fill me-2"></i>登录成功！正在跳转...';
+          loginForm.replaceWith(successMsg);
+
+          // 延迟跳转到首页，让用户看到成功消息
+          setTimeout(() => {
+            window.location.href = "/";
+          }, 1500);
+        })
+        .catch((error) => {
+          console.error("登录失败详情:", error.response);
+
+          // 显示错误信息
+          loginError.textContent =
+            error.response?.data?.error || "登录失败，请检查您的邮箱和密码";
+          loginError.classList.remove("d-none");
+
+          // 重置按钮状态
+          loginButton.disabled = false;
+          loginSpinner.classList.add("d-none");
+        });
+    });
+
+    // 输入时清除错误提示
+    document.getElementById("email").addEventListener("input", function () {
+      this.classList.remove("is-invalid");
+    });
+
+    document.getElementById("password").addEventListener("input", function () {
+      this.classList.remove("is-invalid");
+    });
+  });
 </script>
 {% endblock %}

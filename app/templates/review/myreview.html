@@ -1,0 +1,458 @@
+{% extends "base.html" %}
+
+{% block title %}我的评价 - 美食点评网{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>我的评价</h2>
+        <div>
+            <a href="/restaurant/list" class="btn btn-primary">
+                <i class="bi bi-plus"></i> 添加新评价
+            </a>
+        </div>
+    </div>
+
+    <!-- 评价筛选工具栏 -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="input-group">
+                <input type="text" class="form-control" placeholder="搜索餐厅..." id="search-input">
+                <button class="btn btn-outline-secondary" type="button" id="search-btn">
+                    <i class="bi bi-search"></i>
+                </button>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <select class="form-select" id="rating-filter">
+                <option value="">所有评分</option>
+                <option value="5">★★★★★</option>
+                <option value="4">★★★★☆</option>
+                <option value="3">★★★☆☆</option>
+                <option value="2">★★☆☆☆</option>
+                <option value="1">★☆☆☆☆</option>
+            </select>
+        </div>
+        <div class="col-md-4">
+            <select class="form-select" id="date-filter">
+                <option value="newest">最新优先</option>
+                <option value="oldest">最早优先</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- 评价列表 -->
+    <div class="row" id="reviews-container">
+        <!-- 动态加载评价 -->
+        <div class="col-12 text-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">加载中...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 分页 -->
+    <nav aria-label="Page navigation" class="mt-4">
+        <ul class="pagination justify-content-center" id="pagination">
+            <!-- 分页将通过JavaScript动态生成 -->
+        </ul>
+    </nav>
+</div>
+
+<!-- 删除确认模态框 -->
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">确认删除</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                确定要删除这条评价吗？删除后将无法恢复。
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-danger" id="confirm-delete">确认删除</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 模拟评价数据（当API不可用时显示）
+    const mockReviews = [
+        {
+            reviewId: 1,
+            content: "这家餐厅的菜品非常地道，特别是他们的招牌菜，味道真的很棒！",
+            rating: 5,
+            createdAt: "2023-05-15T08:30:00Z",
+            restaurant: {
+                restaurantId: 101,
+                name: "老北京涮肉坊"
+            },
+            user: {
+                userId: 1,
+                name: "张三"
+            }
+        },
+        {
+            reviewId: 2,
+            content: "环境不错，服务也很周到，但是价格稍微有点高。",
+            rating: 4,
+            createdAt: "2023-04-22T12:15:00Z",
+            restaurant: {
+                restaurantId: 102,
+                name: "东京和食"
+            },
+            user: {
+                userId: 1,
+                name: "张三"
+            }
+        },
+        {
+            reviewId: 3,
+            content: "分量很足，味道也不错，就是上菜速度有点慢。",
+            rating: 3,
+            createdAt: "2023-03-10T18:45:00Z",
+            restaurant: {
+                restaurantId: 103,
+                name: "韩味屋"
+            },
+            user: {
+                userId: 1,
+                name: "张三"
+            }
+        },
+        {
+            reviewId: 4,
+            content: "这是我吃过最差的餐厅之一，强烈不推荐！",
+            rating: 1,
+            createdAt: "2023-02-05T14:20:00Z",
+            restaurant: {
+                restaurantId: 104,
+                name: "某餐厅"
+            },
+            user: {
+                userId: 1,
+                name: "张三"
+            }
+        },
+        {
+            reviewId: 5,
+            content: "菜品新鲜，服务态度好，下次还会再来。",
+            rating: 5,
+            createdAt: "2023-01-18T09:15:00Z",
+            restaurant: {
+                restaurantId: 105,
+                name: "海鲜之家"
+            },
+            user: {
+                userId: 1,
+                name: "张三"
+            }
+        },
+        {
+            reviewId: 6,
+            content: "一般般，没什么特别的印象。",
+            rating: 3,
+            createdAt: "2022-12-30T16:40:00Z",
+            restaurant: {
+                restaurantId: 106,
+                name: "家常菜馆"
+            },
+            user: {
+                userId: 1,
+                name: "张三"
+            }
+        }
+    ];
+
+    let currentPage = 1;
+    let currentSearch = '';
+    let currentRating = '';
+    let currentSort = 'newest';
+    let isUsingMockData = false;
+
+    // 加载评价数据
+    function loadReviews(page = 1, search = '', rating = '', sort = 'newest') {
+        currentPage = page;
+        currentSearch = search;
+        currentRating = rating;
+        currentSort = sort;
+        
+        // 尝试从API获取数据
+        axios.get(`/api/reviews?page=${page}&search=${search}&rating=${rating}&sort=${sort}`)
+            .then(response => {
+                if (response.data && response.data.reviews) {
+                    isUsingMockData = false;
+                    displayReviews(response.data.reviews, response.data.totalPages, page);
+                } else {
+                    console.warn("API返回数据格式不正确，尝试使用模拟数据");
+                    fallbackToMockData(page, search, rating, sort);
+                }
+            })
+            .catch(error => {
+                console.error('获取评价失败:', error);
+                fallbackToMockData(page, search, rating, sort);
+            });
+    }
+    
+    // 回退到模拟数据
+    function fallbackToMockData(page, search, rating, sort) {
+        isUsingMockData = true;
+        // 过滤模拟数据
+        let filteredMock = mockReviews;
+        
+        // 应用搜索过滤
+        if (search) {
+            const searchLower = search.toLowerCase();
+            filteredMock = filteredMock.filter(review => 
+                review.restaurant.name.toLowerCase().includes(searchLower)
+            );
+        }
+        
+        // 应用评分过滤
+        if (rating) {
+            filteredMock = filteredMock.filter(review => review.rating == rating);
+        }
+        
+        // 应用排序
+        if (sort === 'highest') {
+            filteredMock.sort((a, b) => b.rating - a.rating);
+        } else if (sort === 'lowest') {
+            filteredMock.sort((a, b) => a.rating - b.rating);
+        } else { // newest
+            filteredMock.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        }
+        
+        // 计算分页
+        const reviewsPerPage = 5;
+        const totalPages = Math.ceil(filteredMock.length / reviewsPerPage);
+        const startIndex = (page - 1) * reviewsPerPage;
+        const endIndex = Math.min(startIndex + reviewsPerPage, filteredMock.length);
+        const pageReviews = filteredMock.slice(startIndex, endIndex);
+        
+        displayReviews(pageReviews, totalPages, page);
+    }
+    
+    // 显示评价
+    function displayReviews(reviews, totalPages, currentPage) {
+        const container = document.getElementById('reviews-container');
+        container.innerHTML = '';
+        
+        if (reviews.length === 0) {
+            container.innerHTML = `
+                <div class="col-12 text-center py-5">
+                    <i class="bi bi-emoji-frown fs-1 text-muted"></i>
+                    <h4 class="mt-3">没有找到评价记录</h4>
+                    <p class="text-muted">您还没有发表过任何评价${isUsingMockData ? '（使用的是模拟数据）' : ''}</p>
+                    <a href="/restaurant/list" class="btn btn-primary mt-2">
+                        <i class="bi bi-utensils"></i> 去点评餐厅
+                    </a>
+                </div>
+            `;
+            return;
+        }
+        
+        reviews.forEach(review => {
+            // 格式化日期
+            const date = new Date(review.createdAt);
+            const formattedDate = `${date.getFullYear()}-${(date.getMonth()+1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+            
+            const stars = Array(5).fill().map((_, i) => 
+                i < review.rating ? 'bi-star-fill' : 'bi-star'
+            ).join('').match(/.{1,9}/g).map(starClass => 
+                `<i class="bi ${starClass} text-warning"></i>`
+            ).join('');
+            
+            const card = `
+                <div class="col-12 mb-4">
+                    <div class="card review-card" data-review-id="${review.reviewId}">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <h5 class="card-title mb-1">
+                                        <a href="/restaurants/${review.restaurant.restaurantId}" class="text-decoration-none">
+                                            ${review.restaurant.name}
+                                        </a>
+                                    </h5>
+                                    <p class="text-muted small mb-0">
+                                        <i class="bi bi-geo-alt"></i> ${review.restaurant.address || '模拟地址'}
+                                    </p>
+                                </div>
+                                <div class="rating">
+                                    ${stars}
+                                    <span class="ms-1">${review.rating.toFixed(1)}</span>
+                                </div>
+                            </div>
+                            
+                            <p class="card-text">${review.content}</p>
+                            
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <small class="text-muted">
+                                    <i class="bi bi-clock"></i> ${formattedDate}
+                                </small>
+                                <div>
+                                    <button class="btn btn-sm btn-outline-primary me-2 edit-review" 
+                                            data-review-id="${review.reviewId}">
+                                        <i class="bi bi-pencil"></i> 编辑
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger delete-review" 
+                                            data-review-id="${review.reviewId}">
+                                        <i class="bi bi-trash"></i> 删除
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.innerHTML += card;
+        });
+        
+        // 更新分页
+        updatePagination(totalPages, currentPage);
+        
+        // 添加删除和编辑事件
+        addReviewActions();
+    }
+    
+    // 更新分页
+    function updatePagination(totalPages, currentPage) {
+        const pagination = document.getElementById('pagination');
+        pagination.innerHTML = '';
+        
+        // 上一页按钮
+        pagination.innerHTML += `
+            <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+                <a class="page-link" href="#" data-page="${currentPage - 1}">上一页</a>
+            </li>
+        `;
+        
+        // 页码按钮
+        const maxVisiblePages = 5;
+        let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+        let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+        
+        if (endPage - startPage + 1 < maxVisiblePages) {
+            startPage = Math.max(1, endPage - maxVisiblePages + 1);
+        }
+        
+        if (startPage > 1) {
+            pagination.innerHTML += `
+                <li class="page-item">
+                    <a class="page-link" href="#" data-page="1">1</a>
+                </li>
+            `;
+            if (startPage > 2) {
+                pagination.innerHTML += `
+                    <li class="page-item disabled">
+                        <span class="page-link">...</span>
+                    </li>
+                `;
+            }
+        }
+        
+        for (let i = startPage; i <= endPage; i++) {
+            pagination.innerHTML += `
+                <li class="page-item ${i === currentPage ? 'active' : ''}">
+                    <a class="page-link" href="#" data-page="${i}">${i}</a>
+                </li>
+            `;
+        }
+        
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) {
+                pagination.innerHTML += `
+                    <li class="page-item disabled">
+                        <span class="page-link">...</span>
+                    </li>
+                `;
+            }
+            pagination.innerHTML += `
+                <li class="page-item">
+                    <a class="page-link" href="#" data-page="${totalPages}">${totalPages}</a>
+                </li>
+            `;
+        }
+        
+        // 下一页按钮
+        pagination.innerHTML += `
+            <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+                <a class="page-link" href="#" data-page="${currentPage + 1}">下一页</a>
+            </li>
+        `;
+        
+        // 添加分页点击事件
+        document.querySelectorAll('.page-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const page = parseInt(this.getAttribute('data-page'));
+                loadReviews(page, currentSearch, currentRating, currentSort);
+            });
+        });
+    }
+    
+    // 添加评价操作事件
+    function addReviewActions() {
+        // 删除评价
+        document.querySelectorAll('.delete-review').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const reviewId = this.getAttribute('data-review-id');
+                const modal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
+                
+                document.getElementById('confirm-delete').onclick = function() {
+                    axios.delete(`/api/reviews/${reviewId}`, {
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        }
+                    })
+                    .then(() => {
+                        modal.hide();
+                        loadReviews(currentPage, currentSearch, currentRating, currentSort);
+                    })
+                    .catch(error => {
+                        console.error('删除评价失败:', error);
+                        alert('删除评价失败');
+                    });
+                };
+                
+                modal.show();
+            });
+        });
+        
+        // 编辑评价
+        document.querySelectorAll('.edit-review').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const reviewId = this.getAttribute('data-review-id');
+                window.location.href = `/reviews/${reviewId}/edit`;
+            });
+        });
+    }
+    
+    // 初始加载
+    loadReviews();
+    
+    // 搜索功能
+    document.getElementById('search-btn').addEventListener('click', function() {
+        const search = document.getElementById('search-input').value;
+        loadReviews(1, search, currentRating, currentSort);
+    });
+    
+    // 评分筛选
+    document.getElementById('rating-filter').addEventListener('change', function() {
+        const rating = this.value;
+        loadReviews(1, currentSearch, rating, currentSort);
+    });
+    
+    // 时间排序
+    document.getElementById('date-filter').addEventListener('change', function() {
+        const sort = this.value;
+        loadReviews(1, currentSearch, currentRating, sort);
+    });
+});
+</script>
+{% endblock %}
