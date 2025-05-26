@@ -32,7 +32,7 @@ class User:
               .property('password', hashed_pw) \
               .property('type', user_type) \
               .property('createdAt', datetime.datetime.now().isoformat()) \
-              .next()
+              .iterate()
             
             return user_id, None
         except Exception as e:
@@ -225,6 +225,20 @@ class User:
             return  str(e)
         finally:
             db.close()
+
+    @staticmethod
+    def update_name(user_id, new_name):
+        """更新用户昵称"""
+        try:
+            db.g.V().has('user', 'userId', user_id) \
+                  .property('name', new_name) \
+                  .next()
+            return True, None
+        except Exception as e:
+            return False, str(e)
+        finally:
+            db.close()
+
 
 # @classmethod
 # def get_by_id(cls, user_id):
