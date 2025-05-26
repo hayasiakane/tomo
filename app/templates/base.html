@@ -271,8 +271,8 @@
               </button>
               <ul class="dropdown-menu dropdown-menu-end">
                 <li>
-                  <a class="dropdown-item" href="#" id="profile-link"
-                    ><i class="bi bi-person me-2"></i>个人资料</a
+                  <a class="dropdown-item" href="/profile.html">
+                    <i class="bi bi-person me-2"></i>个人资料</a
                   >
                 </li>
                 <li>
@@ -350,8 +350,16 @@
       function checkAuth() {
         const token = localStorage.getItem("token");
         const userId = localStorage.getItem("userId");
-        const username = localStorage.getItem("username");
+        
+        // 主昵称：用户编辑保存后的昵称
+        let username = localStorage.getItem(`username_${userId}`);
 
+        // 如果没设置（比如刚注册），就尝试后端 profileData 中的昵称
+        if (!username) {
+          const profileData = JSON.parse(localStorage.getItem(`profileData_${userId}`) || '{}');
+          username = profileData.name || "用户";
+        }
+        
         if (token && userId) {
           document.getElementById("auth-buttons").classList.add("d-none");
           document.getElementById("user-menu").classList.remove("d-none");
