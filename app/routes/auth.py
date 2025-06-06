@@ -34,6 +34,8 @@ def api_login():
         return jsonify({"error": "无效的邮箱或密码"}), 401
     
     token = create_access_token(identity=str(user.userId)) # 生成JWT令牌，identity为用户ID
+    # # 设置cookie
+    # request.set_cookie('user_id', user.userId, httponly=False, secure=True)  # 设置HTTPOnly和Secure属性
 
     # 生成响应（实际项目应使用JWT）
     return jsonify({

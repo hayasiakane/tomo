@@ -72,6 +72,14 @@ def update_user_profile():
 
     # ✅ 上传头像（如果提供）
     if image_file:
+        # 先将原头像文件删除（如果存在）
+        if user.image:
+            try:
+                old_image_path = os.path.join(current_app.root_path, user.image.lstrip('/'))
+                if os.path.exists(old_image_path):
+                    os.remove(old_image_path)
+            except Exception as e:
+                print(f"删除旧头像失败: {e}")
         filename = secure_filename(image_file.filename)
         upload_dir = os.path.join(current_app.root_path, f'static/user_avatar/{user_id}')
         os.makedirs(upload_dir, exist_ok=True)
@@ -104,13 +112,14 @@ def get_friend_list(user_id):
     return jsonify(friend_list), 200
 
 
-@user_bp.route('/friend_profile/<int:userid>', methods=['GET'])
+@user_bp.route('/user/<int:userid>/friend_profile/<int:friendid>', methods=['GET'])
 # @login_required
-def friend_profile(userid):
-    user = User.query.get(userid)# get函数通过主键获取信息
+def friend_profile(userid, friendid):
+    """ 查看好友的个人资料 """
+    friend_info = User.query.get(friendid)# get函数通过主键获取信息
     # 获取用户信息
-    restaurants = Restaurant.query.filter_by(userId=userid).all()
-    reviews = review.query.filter_by(userId=userid).all()
+    restaurants = Restaurant.query.filter_by(userId=friendid).all()
+    reviews = review.query.filter_by(userId=friendid).all()
     # 在每条review中添加restaurant_name字段
     for r in reviews:
         restaurant = Restaurant.query.get(r.restaurantId)
@@ -119,4 +128,36 @@ def friend_profile(userid):
         else:
             r.restaurant_name = "未知餐厅"
 
-    return render_template('user/friend_profile.html', friend=user, restaurant=restaurants, reviews=reviews)
+    existing_friendship = friendships.query.filter_by(userId=userid, friend_id=friendid).first()
+        
+    return render_template('user/friend_profile.html',
+                            friend=friend_info, 
+                            restaurant=restaurants, 
+                            reviews=reviews,
+                            current_user_id=userid,
+                            is_following=existing_friendship is not None)
+
+
+@user_bp.route('/api/users/<int:user_id>/follow/<int:friend_id>', methods=['POST'])
+def follow_user(user_id, friend_id):
+    if user_id == friend_id:
+        return jsonify({"error": "不能关注自己"}), 400
+
+    existing = friendships.query.filter_by(userId=user_id, friend_id=friend_id).first()
+    if existing:
+        return jsonify({"message": "已关注"}), 200
+
+    new_relation = friendships(userId=user_id, friend_id=friend_id)
+    db.session.add(new_relation)
+    db.session.commit()
+    return jsonify({"message": "关注成功"}), 201
+
+@user_bp.route('/api/users/<int:user_id>/follow/<int:friend_id>', methods=['DELETE'])
+def unfollow_user(user_id, friend_id):
+    relation = friendships.query.filter_by(userId=user_id, friend_id=friend_id).first()
+    if not relation:
+        return jsonify({"message": "尚未关注"}), 200
+
+    db.session.delete(relation)
+    db.session.commit()
+    return jsonify({"message": "已取消关注"}), 200

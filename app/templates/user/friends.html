@@ -205,7 +205,7 @@ document.addEventListener('DOMContentLoaded', function() {
       // 动态生成好友卡片
       friends.forEach(friend => {
           const friendCard = document.createElement('a');
-          friendCard.href = `/friend_profile/${friend.userId}`;
+          friendCard.href = `/user/${userId}/friend_profile/${friend.userId}`;
           friendCard.className = 'friend-card text-decoration-none';
           friendCard.innerHTML = `
             <img class="friend-avatar" src="${friend.image || '/static/img/avatar_1.jpg'}"
@@ -227,7 +227,7 @@ document.addEventListener('DOMContentLoaded', function() {
       console.error('获取好友列表失败:', error);
       document.getElementById('friends-container').innerHTML = `
         <div class="empty-state">
-          <img src="/static/img/error.svg" alt="加载失败">
+          <img src="/static/img/error.png" alt="加载失败">
           <h4>加载好友列表失败</h4>
           <p>请稍后再试，或检查网络连接</p>
           <button onclick="window.location.reload()" class="btn btn-primary">重新加载</button>

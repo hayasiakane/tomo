@@ -171,7 +171,7 @@
           <a href="/restaurants" class="btn btn-lg btn-discover me-3">
             <span class="food-icon">🍽️</span>探索美食
           </a>
-          <a href="/register" class="btn btn-lg btn-join" id="join-us-btn">
+          <a href="/auth/register" class="btn btn-lg btn-join" id="join-us-btn">
             <i class="bi bi-person-plus me-2"></i>加入我们
           </a>
         </div>
@@ -553,6 +553,7 @@
     axios
       .get("/api/restaurants/hot-restaurants?limit=4")
       .then((response) => {
+        const userid = localStorage.getItem("userId");
         const container = document.getElementById("featured-restaurants");
         container.innerHTML = "";
 
@@ -622,6 +623,7 @@
   axios
     .get("/api/reviews/latest")
     .then((response) => {
+      const current_user_id = localStorage.getItem("userId");
       const container = document.getElementById("latest-reviews");
       container.innerHTML = "";
 
@@ -649,7 +651,7 @@
                 <h5 class="card-title">${review.restaurantName || "人气餐厅"}</h5>
                 <p class="card-text">${review.content || "这家餐厅的菜品非常美味，值得推荐！"}</p>
                 <div class="d-flex justify-content-between align-items-center mt-3">
-                    <a href="/friend_profile/${review.userId}" class="btn btn-sm btn-light me-2">
+                    <a href="/user/${ current_user_id }/friend_profile/${review.userId}" class="btn btn-sm btn-light me-2">
                     <i class="bi bi-person"></i> 查看用户主页
                     </a>
                   <a href="/api/restaurants/show/${review.restaurantId}" class="btn btn-sm btn-outline-primary">查看餐厅</a>

@@ -13,13 +13,23 @@
              alt="头像"
              onerror="this.src='/static/img/avatar_1.jpg'; this.onerror=null;">
       </div>
-      <div class="col-md-9">
+      <div class="col-md-7">
         <div class="card-body">
           <h3 class="card-title">{{ friend.name }}</h3>
           <p class="card-text text-muted">{{ friend.email }}</p>
           <p class="card-text"><small class="text-muted">加入时间：{{ friend.createdAt.strftime('%Y-%m-%d') }}</small></p>
         </div>
       </div>
+      <div class="col-md-2 text-center p-2">
+        <button class="btn btn-outline-primary rounded-pill text-muted fw-light" id="follow-btn" data-following="{{ '1' if is_following else '0' }}">
+          {% if is_following %}
+            <i class="bi bi-check-circle text-primary"></i> 取消关注
+          {% else %}
+            <i class="bi bi-person-plus text-primary"></i> 关注
+          {% endif %}
+        </button>
+      </div>
+
     </div>
   </div>
 
@@ -75,4 +85,42 @@
     {% endif %}
   </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const followBtn = document.getElementById('follow-btn');
+  if (!followBtn) return;
+
+  const currentUserId = "{{ current_user_id }}";
+  const friendId = "{{ friend.userId }}";
+  const isFollowing = followBtn.dataset.following === "1";
+
+  followBtn.addEventListener('click', async function () {
+    try {
+      const url = `/api/users/${currentUserId}/follow/${friendId}`;
+      const method = isFollowing ? "DELETE" : "POST";  // 取消关注 or 添加关注
+
+      await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      // 前端刷新按钮状态
+      followBtn.innerHTML = isFollowing
+        ? `<i class="bi bi-person-plus text-primary"></i> 关注`
+        : `<i class="bi bi-check-circle text-primary"></i> 已关注`;
+
+      followBtn.dataset.following = isFollowing ? "0" : "1";
+
+    } catch (err) {
+      console.error("关注操作失败:", err);
+      alert("操作失败，请稍后再试");
+    }
+  });
+});
+</script>
 {% endblock %}

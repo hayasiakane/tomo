@@ -4,6 +4,7 @@ from flask import request, redirect, url_for, flash
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
+        print(request.cookies.get('user_id'))
         if not request.cookies.get('user_id'):
             flash('请先登录', 'warning')
             return redirect(url_for('auth.login', next=request.url))

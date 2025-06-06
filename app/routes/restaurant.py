@@ -133,7 +133,7 @@ def api_display_all_restaurants():
 
 @restaurant_bp.route('/my-restaurants/<user_id>', methods=['GET'])
 # @login_required
-# @business_account_required
+@business_account_required
 def my_restaurants(user_id):
     """  显示当前用户的餐厅列表  """
 

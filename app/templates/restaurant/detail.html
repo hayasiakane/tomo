@@ -227,32 +227,34 @@
                 // 并发获取用户名
                 const userInfoPromises = reviews.map(r => getUserInfoById(r.userId));
                 const userInfos = await Promise.all(userInfoPromises);
-
+                const current_user_id = localStorage.getItem('userId');
 
                 reviews.forEach((review, idx) => {
                     const { name: userName, image: userImage } = userInfos[idx];
                     const createdAt = new Date(review.createdAt).toLocaleDateString();
 
-                const reviewHtml = `
-                    <div class="card mb-3 shadow-sm">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <div class="d-flex align-items-center">
-                                    <img src="${userImage}" class="rounded-circle me-3" width="48" height="48" style="object-fit: cover;">
-                                    <h5 class="mb-0">${userName}</h5>
+                    const reviewHtml = `
+                        <div class="card mb-3 shadow-sm">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <div class="d-flex align-items-center">
+                                        <a href="/user/${current_user_id}/friend_profile/${review.userId}">
+                                            <img src="${userImage}" class="rounded-circle me-3" width="48" height="48" style="object-fit: cover;">
+                                        </a>
+                                        <h5 class="mb-0">${userName}</h5>
+                                    </div>
+                                    <div class="text-warning">
+                                        ${'<i class="bi bi-star-fill"></i>'.repeat(review.rating)}
+                                        ${'<i class="bi bi-star"></i>'.repeat(5 - review.rating)}
+                                    </div>
                                 </div>
-                                <div class="text-warning">
-                                    ${'<i class="bi bi-star-fill"></i>'.repeat(review.rating)}
-                                    ${'<i class="bi bi-star"></i>'.repeat(5 - review.rating)}
+                                <p class="card-text mt-2">${review.content}</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">${createdAt}</small>
                                 </div>
-                            </div>
-                            <p class="card-text mt-2">${review.content}</p>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <small class="text-muted">${createdAt}</small>
                             </div>
                         </div>
-                    </div>
-                `;
+                    `;
 
 
                     container.innerHTML += reviewHtml;

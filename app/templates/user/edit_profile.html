@@ -157,6 +157,10 @@ document.addEventListener("DOMContentLoaded", function () {
         "Content-Type": "multipart/form-data"
       }
     }).then(() => {
+      // 如果name修改了，更新本地存储
+      if (name) {
+        localStorage.setItem(nameKey, name);
+      }
       window.location.href = `/profile/${userId}`;
     }).catch(err => {
       alert("修改失败：" + (err.response?.data?.error || err.message));
