@@ -365,8 +365,7 @@
 
         // 如果没设置（比如刚注册），就尝试后端 profileData 中的昵称
         if (!username) {
-          const profileData = JSON.parse(localStorage.getItem(`profileData_${userId}`) || '{}');
-          username = profileData.name || "用户";
+          username = "用户";
         }
         
         if (token && userId) {
