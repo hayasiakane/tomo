@@ -365,7 +365,7 @@ block content %}
       try {
         // 发送注册请求
         const response = await axios.post(
-          "/api/users/register",
+          "/auth/api/users/register",
           {
             name: name.value,
             email: email.value,

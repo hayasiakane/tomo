@@ -13,7 +13,7 @@
 </div>
 
 <div class="row mb-4">
-    <div class="col-md-6">
+    <div class="col-md-5">
         <div class="input-group">
             <input type="text" class="form-control" placeholder="搜索餐厅..." id="search-input">
             <button class="btn btn-outline-secondary" type="button" id="search-btn">
@@ -21,7 +21,7 @@
             </button>
         </div>
     </div>
-    <div class="col-md-6">
+    <div class="col-md-5 d-flex gap-2" >
         <select class="form-select" id="cuisine-filter">
             <option value="">所有菜系</option>
             <option value="中餐">中餐</option>
@@ -32,7 +32,11 @@
             <option value="烧烤">烧烤</option>
         </select>
     </div>
+    <div class="col-md-2 d-flex justify-content-end">
+        <button class="btn btn-primary" id="filter-btn">筛选</button>
+    </div>
 </div>
+
 
 <div class="row" id="restaurants-container">
     <!-- 动态加载餐厅 -->
@@ -68,88 +72,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.error('获取用户信息失败:', error);
             });
     }
-    
-    // 模拟餐厅数据（当API不可用时显示）
-    const mockRestaurants = [
-        {
-            restaurantId: 1,
-            name: "老北京涮肉坊",
-            address: "北京市东城区王府井大街88号",
-            cuisine: "火锅",
-            reviewCount: 128,
-            rating: 4.7,
-            image:"https://ts1.tc.mm.bing.net/th/id/R-C.265cd5b45a3377f5a1b643cbee1590b8?rik=ZWPw7yWvPpQUyg&riu=http%3a%2f%2fimg.qianggen.net%2fuploadfile%2f2022%2f0607%2f20220607104513383.jpg&ehk=3%2bA99Ui7qMeXaF8fsU9alT6m6ETa0srHjlwAp2UIuFQ%3d&risl=&pid=ImgRaw&r=0"
-        },
-        {
-            restaurantId: 2,
-            name: "东京和食",
-            address: "上海市静安区南京西路1266号",
-            cuisine: "日料",
-            reviewCount: 95,
-            rating: 4.5,
-            image:"https://img1.qunarzz.com/travel/d6/1710/2f/8519a3f08f2bdcb5.jpg"
-        },
-        {
-            restaurantId: 3,
-            name: "韩味屋",
-            address: "广州市天河区珠江新城华夏路8号",
-            cuisine: "韩餐",
-            reviewCount: 76,
-            rating: 4.3,
-            image:"https://tse1-mm.cn.bing.net/th/id/OIP-C.kbvfT1XK_NZKphHqRKrXQQHaFj?rs=1&pid=ImgDetMain"
-        },
-        {
-            restaurantId: 4,
-            name: "川味观",
-            address: "成都市武侯区春熙路8号",
-            cuisine: "中餐",
-            reviewCount: 152,
-            rating: 4.8,
-            image:"https://img.mad-men.com/article/2020/11/2020/11/1604975190166.jpeg"
-        },
-        {
-            restaurantId: 5,
-            name: "意大利风情餐厅",
-            address: "深圳市福田区深南大道6001号",
-            cuisine: "西餐",
-            reviewCount: 68,
-            rating: 4.2,
-            image:"https://ts1.tc.mm.bing.net/th/id/R-C.59f9c640970cc0c5104db7ec3c42e694?rik=OK%2bNcPSiCgrYMQ&riu=http%3a%2f%2fdining.shangliutatler.com%2ffiles%2fuploads%2f20170111-4a797cec37f479f0430fd_cropped_930x510.jpg&ehk=QWEUFJrEsPeQhT3DeTcx5y2L9A9SnaN%2bqJJADG%2b8qZM%3d&risl=&pid=ImgRaw&r=0"
-        },
-        {
-            restaurantId: 6,
-            name: "韩国烤肉大王",
-            address: "杭州市西湖区湖滨路3号",
-            cuisine: "烧烤",
-            reviewCount: 112,
-            rating: 4.6,
-            image:"https://pic.nximg.cn/file/20230209/33252611_112515924108_2.jpg"
-        }
-    ];
 
     // 加载餐厅数据（优先使用API，失败则使用模拟数据）
-    function loadRestaurants(page = 1, search = '', cuisine = '') {
-        axios.get(`/api/restaurants?page=${page}&search=${search}&cuisine=${cuisine}`)
+    function loadRestaurants(search = '', cuisine = '') {
+        // 修改API端点为 /display-all（根据你的后端路由）
+        axios.get(`/api/restaurants/display-all?search=${search}&cuisine=${cuisine}`)
             .then(response => {
                 const container = document.getElementById('restaurants-container');
                 container.innerHTML = '';
                 
                 if (response.data.restaurants.length === 0) {
-                    // 如果API返回空，尝试使用模拟数据
-                    if (search || cuisine) {
-                        const filteredMock = mockRestaurants.filter(r => 
-                            (!search || r.name.includes(search)) && 
-                            (!cuisine || r.cuisine === cuisine)
-                        );
-                        
-                        if (filteredMock.length > 0) {
-                            container.innerHTML = '';
-                            displayRestaurants(container, filteredMock, 1, 6);
-                            updatePagination(1, 1);
-                            return;
-                        }
-                    }
-                    
+                    // 如果API返回空，直接显示"没有找到符合条件的餐厅"提示
                     container.innerHTML = `
                         <div class="col-12 text-center py-5">
                             <i class="bi bi-emoji-frown fs-1 text-muted"></i>
@@ -160,74 +93,99 @@ document.addEventListener('DOMContentLoaded', function() {
                     return;
                 }
                 
-                displayRestaurants(container, response.data.restaurants, page, response.data.totalPages);
-                updatePagination(response.data.totalPages, page);
+                // 显示餐厅数据
+                displayRestaurants(container, response.data.restaurants);
             })
             .catch(error => {
                 console.error('获取餐厅失败:', error);
                 
-                // API失败时使用模拟数据
-                const filteredMock = mockRestaurants.filter(r => 
-                    (!search || r.name.includes(search)) && 
-                    (!cuisine || r.cuisine === cuisine)
-                );
-                
-                if (filteredMock.length > 0) {
-                    const container = document.getElementById('restaurants-container');
-                    container.innerHTML = '';
-                    displayRestaurants(container, filteredMock, 1, 1);
-                    updatePagination(1, 1);
-                } else {
-                    container.innerHTML = `
-                        <div class="col-12 text-center py-5">
-                            <i class="bi bi-emoji-frown fs-1 text-muted"></i>
-                            <h4 class="mt-3">没有找到符合条件的餐厅</h4>
-                            <p class="text-muted">尝试不同的搜索条件</p>
-                        </div>
-                    `;
-                }
+                // API失败时直接显示错误提示（不再使用模拟数据）
+                const container = document.getElementById('restaurants-container');
+                container.innerHTML = `
+                    <div class="col-12 text-center py-5">
+                        <i class="bi bi-emoji-frown fs-1 text-muted"></i>
+                        <h4 class="mt-3">获取餐厅数据失败</h4>
+                        <p class="text-muted">请稍后重试或检查网络连接</p>
+                    </div>
+                `;
             });
     }
-    
-    function displayRestaurants(container, restaurants, currentPage, totalPages) {
-        container.innerHTML = '';
-        
-        if (restaurants.length === 0) {
-            container.innerHTML = `
-                <div class="col-12 text-center py-5">
-                    <i class="bi bi-emoji-frown fs-1 text-muted"></i>
-                    <h4 class="mt-3">没有找到符合条件的餐厅</h4>
-                    <p class="text-muted">尝试不同的搜索条件</p>
-                </div>
-            `;
-            return;
-        }
+
+    // 显示餐厅列表的函数
+    function displayRestaurants(container, restaurants) {
+        // 去重：确保每个 restaurantId 只渲染一次
+        const uniqueRestaurants = [];
+        const seenIds = new Set();
         
         restaurants.forEach(restaurant => {
-            const card = `
-                <div class="col-md-4 mb-4">
-                    <div class="card h-100 restaurant-card">
-                        <img src="${restaurant.image}" height="300" width="100%"
-                             class="card-img-top" alt="${restaurant.name}">
-                        <div class="card-body">
-                            <h5 class="card-title">${restaurant.name}</h5>
-                            <p class="card-text text-muted">
-                                <i class="bi bi-geo-alt"></i> ${restaurant.address}
-                            </p>
-                            <p class="card-text">
-                                <span class="badge bg-secondary">${restaurant.cuisine}</span>
-                            </p>
-                            <div class="rating mb-2">
-                                ${getStars(restaurant.rating)}
-                                <span class="ms-1">${restaurant.rating.toFixed(1)} (${restaurant.reviewCount}条评价)</span>
+            if (!seenIds.has(restaurant.restaurantId)) {
+                seenIds.add(restaurant.restaurantId);
+                uniqueRestaurants.push(restaurant);
+            }
+        });
+        
+        let restaurantHtml = '';
+        uniqueRestaurants.forEach(restaurant => {
+            restaurantHtml += `
+                <div class="col-md-3 col-sm-6 mb-4">
+                    <div class="card h-100 restaurant-card border-0 shadow-sm">
+                        <div class="position-relative">
+                            <img src="${
+                            restaurant.image ||
+                            "/static/images/restaurant-interior.jpg"
+                            }"
+                            onerror="this.src='/static/images/restaurant-interior.jpg'; this.onerror=null;"
+                                class="card-img-top" alt="${
+                                restaurant.name
+                                }" style="height: 180px; object-fit: cover;">
+                            <div class="position-absolute bottom-0 start-0 bg-dark bg-opacity-50 text-white p-2 m-2 rounded-pill small">
+                                <i class="bi bi-geo-alt me-1"></i>${
+                                restaurant.address
+                                }
                             </div>
-                            <a href="/restaurants/${restaurant.restaurantId}" class="btn btn-outline-primary">查看详情</a>
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title mb-1">${restaurant.name}</h5>
+                            <p class="card-text text-muted small mb-2">${
+                            restaurant.cuisine
+                            }</p>
+                            <div class="rating mb-3">
+                                ${generateStars(restaurant.average_rating)}
+                                <span class="ms-1">${restaurant.average_rating ? restaurant.average_rating.toFixed(1) : '0.0'}</span>
+                                <span class="text-muted small ms-2">(${restaurant.review_count || 0}条评价)</span>
+                            </div>
+                            <a href="/api/restaurants/show/${restaurant.restaurantId}" class="btn btn-sm btn-outline-primary w-100">查看详情</a>
                         </div>
                     </div>
                 </div>
             `;
-            container.innerHTML += card;
+
+            // 辅助函数：根据评分生成星星HTML
+            function generateStars(rating) {
+                let starsHtml = '';
+                const fullStars = Math.floor(rating || 0);
+                const hasHalfStar = (rating || 0) % 1 >= 0.5;
+                
+                // 添加实心星
+                for (let i = 0; i < fullStars; i++) {
+                    starsHtml += '<i class="bi bi-star-fill"></i>';
+                }
+                
+                // 添加半星（如果有）
+                if (hasHalfStar) {
+                    starsHtml += '<i class="bi bi-star-half"></i>';
+                }
+                
+                // 添加空心星（补足5颗）
+                const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+                for (let i = 0; i < emptyStars; i++) {
+                    starsHtml += '<i class="bi bi-star"></i>';
+                }
+                
+                return starsHtml;
+            }
         });
+        container.innerHTML += restaurantHtml;
     }
     
     function getStars(rating) {
@@ -329,21 +287,20 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // 初始加载
-    loadRestaurants();
+    // 初始加载时检查URL参数
+    const urlParams = new URLSearchParams(window.location.search);
+    const search = urlParams.get('search') || '';
+    const cuisine = urlParams.get('cuisine') || '';
+    loadRestaurants(search, cuisine);
     
-    // 搜索功能
-    document.getElementById('search-btn').addEventListener('click', function() {
+
+    // 执行筛选按钮事件
+    document.getElementById('filter-btn').addEventListener('click', function () {
         const search = document.getElementById('search-input').value;
         const cuisine = document.getElementById('cuisine-filter').value;
-        loadRestaurants(1, search, cuisine);
+        loadRestaurants(search, cuisine);
     });
-    
-    // 菜系筛选
-    document.getElementById('cuisine-filter').addEventListener('change', function() {
-        const search = document.getElementById('search-input').value;
-        const cuisine = this.value;
-        loadRestaurants(1, search, cuisine);
-    });
+
 });
 </script>
 {% endblock %}

@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block title %}我的餐厅 - 美食点评网{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="mb-4">我的餐厅</h1>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="row" id="restaurants-container">
+            <!-- 餐厅将通过JavaScript动态加载 -->
+            <div class="text-center py-4">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">加载中...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 添加餐厅按钮 -->
+<div>
+    <a href="/restaurants/add" class="btn btn-primary" id="add-restaurant-btn" style="display: none;">
+        <i class="bi bi-plus"></i> 添加餐厅
+    </a>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 获取当前用户的ID
+        const userId = localStorage.getItem('userId') || '{{ user_id }}';
+        
+        // 加载用户的所有餐厅
+        async function loadRestaurants() {
+            try {
+                const response = await axios.get(`/api/restaurants/my-restaurants/${userId}`);
+                const container = document.getElementById('restaurants-container');
+                container.innerHTML = '';
+
+                if (response.data.restaurants.length === 0) {
+                    container.innerHTML = `
+                        <div class="alert alert-info">
+                            您还没有添加任何餐厅，请点击下方按钮添加。
+                        </div>
+                        <button class="btn btn-primary" id="show-add-restaurant-form">添加餐厅</button>
+                    `;
+                    return;
+                }
+
+                response.data.restaurants.forEach(restaurant => {
+                    const card = `
+                        <div class="col-lg-4 col-md-6 col-sm-12 mb-4">
+                            <div class="card restaurant-card" data-restaurant-id="${restaurant.id}">
+                                <div class="card-body">
+                                    <h5 class="card-title">${restaurant.name}</h5>
+                                    <p class="text-muted">
+                                        <i class="bi bi-geo-alt"></i> ${restaurant.address}
+                                    </p>
+                                    <p>
+                                        <span class="badge bg-secondary">${restaurant.cuisine}</span>
+                                    </p>
+                                    <div class="d-flex justify-content-between align-items-center mt-3">
+                                        <small class="text-muted">
+                                            <i class="bi bi-star-fill"></i>
+                                            <span>${restaurant.average_rating || '暂无评分'}</span>
+                                        </small>
+                                        <div>
+                                            <a href="/api/restaurants/show/${restaurant.restaurantId}" style="text-decoration: none; color: inherit;">
+                                                <button class="btn btn-sm btn-outline-primary me-2 view-reviews" data-restaurant-id="${restaurant.restaurantId}">
+                                                    <i class="bi bi-eye"></i> 查看详情
+                                                </button>
+                                            </a>
+                                            <label class="btn btn-sm btn-outline-warning mb-0">
+                                                <i class="bi bi-upload"></i> 上传展示图
+                                                <input type="file" accept="image/*" class="d-none upload-image-input" data-restaurant-id="${restaurant.restaurantId}">
+                                            </label>
+                                            <!--
+                                            <button class="btn btn-sm btn-outline-danger delete-restaurant" data-restaurant-id="${restaurant.id}">
+                                                <i class="bi bi-trash"></i> 删除
+                                            </button>
+                                            -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    container.insertAdjacentHTML('beforeend', card);
+                });
+            } catch (error) {
+                console.error('获取餐厅失败:', error);
+                document.getElementById('restaurants-container').innerHTML = `
+                    <div class="alert alert-danger">
+                        获取餐厅失败，请稍后再试。
+                    </div>
+                `;
+            }
+        }
+
+        // 初始加载餐厅
+        loadRestaurants();
+        
+        // 显示添加餐厅展示图按钮
+        document.addEventListener('change', async function (e) {
+            if (e.target.classList.contains('upload-image-input')) {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const restaurantId = e.target.dataset.restaurantId;
+                const formData = new FormData();
+                formData.append('image', file);
+                formData.append('restaurantId', restaurantId);
+
+                try {
+                    const res = await axios.post('/api/restaurants/upload_display-image', formData, {
+                        headers: { 'Content-Type': 'multipart/form-data' }
+                    });
+                    alert('上传成功！');
+                } catch (err) {
+                    alert('上传失败：' + (err.response?.data?.error || err.message));
+                }
+            }
+        });
+
+    });
+</script>
+{% endblock %}

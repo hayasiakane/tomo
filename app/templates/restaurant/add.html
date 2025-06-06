@@ -86,32 +86,44 @@ document.addEventListener('DOMContentLoaded', function() {
             window.location.href = '/';
         });
     
-    // 处理表单提交
     document.getElementById('add-restaurant-form').addEventListener('submit', function(e) {
         e.preventDefault();
         
-        const formData = {
-            name: document.getElementById('name').value,
-            address: document.getElementById('address').value,
-            cuisine: document.getElementById('cuisine').value,
-            description: document.getElementById('description').value,
-            phone: document.getElementById('phone').value,
-            website: document.getElementById('website').value,
-            openingHours: document.getElementById('opening-hours').value
-        };
+        // 1. 准备 FormData（用于上传图片和传递 userId）
+        const formData = new FormData();
         
-        axios.post('/api/restaurants', formData, {
+        // 添加普通字段
+        formData.append('userId', userId);  // 直接通过 FormData 传递 userId
+        formData.append('name', document.getElementById('name').value);
+        formData.append('address', document.getElementById('address').value);
+        formData.append('cuisine', document.getElementById('cuisine').value);
+        formData.append('description', document.getElementById('description').value);
+        
+        // 添加可选字段（如果后端需要）
+        formData.append('phone', document.getElementById('phone').value);
+        formData.append('website', document.getElementById('website').value);
+        // formData.append('openingHours', document.getElementById('opening-hours').value);
+        
+        // 添加图片（如果是多文件，需要多次 append）
+        const images = document.getElementById('images').files;
+        if (images.length > 0) {
+            for (const file of images) {
+                formData.append('images', file);  // 多个文件需要多次 append
+            }
+        }
+        
+        // 2. 发送请求（使用 FormData，不需要手动设置 Content-Type）
+        axios.post('/api/restaurants/add', formData, {  // 注意末尾的 `/`
             headers: {
-                'X-User-ID': userId,
-            //    'Authorization': `Bearer ${token}`
+                'Authorization': `Bearer ${token}`  // 保留 Authorization 头
             }
         })
         .then(response => {
             alert('餐厅添加成功！');
-            console.log("API 返回数据:", response.data); // 检查返回的数据结构
+            console.log("API 返回数据:", response.data);
             const restaurantId = response.data.restaurantId;
-            window.location.href = `/restaurants/${restaurantId}`;
-            //window.location.href = `/restaurants/detail`;
+            // 重定向到餐厅详情页
+            window.location.href = `/api/restaurants/show/${restaurantId}`;
         })
         .catch(error => {
             console.error('添加餐厅失败:', error);

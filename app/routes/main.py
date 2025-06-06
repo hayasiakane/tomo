@@ -11,10 +11,6 @@ def index():
 def restaurant_list():
     return render_template('restaurant/restaurants.html')
 
-# @main_bp.route('/restaurants/<restaurant_id>')
-# def restaurant_detail(restaurant_id):
-#     return render_template('restaurant/detail.html', restaurant_id=restaurant_id)
-
 @main_bp.route('/restaurants/add')
 def restaurant_add():
     return render_template('restaurant/add.html')
@@ -23,14 +19,15 @@ def restaurant_add():
 def myreviews():
     return render_template('review/myreview.html')
 
-@main_bp.route('/profile.html')
-def profile_page():
-    return render_template('user/profile.html')
 
-@main_bp.route('/friends.html')
+@main_bp.route('/friends')
 def friends_page():
     return render_template('user/friends.html')
 
-@main_bp.route('/edit_profile.html')
+@main_bp.route('/edit_profile')
 def edit_profile_page():
     return render_template('user/edit_profile.html')
+
+@main_bp.route('/my-restaurants')
+def my_restaurants():
+    return render_template('restaurant/my_restaurants.html')

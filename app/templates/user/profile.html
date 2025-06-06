@@ -4,11 +4,6 @@
 
 {% block content %}
 <style>
-  html, body {
-    margin: 0;
-    padding: 0;
-  }
-
   main {
     padding-top: 40px;
     padding-bottom: 15px;
@@ -43,24 +38,19 @@
   .profile-name {
     font-size: 1.8rem;
     font-weight: 600;
-    color:#5c3a1a;
+    color: #5c3a1a;
     margin-bottom: 20px;
-    line-height: 1.2;
-    font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
   }
 
   .profile-info {
-  font-size: 0.95rem;
-  font-weight: 500; /* 微调粗细 */
-  color: #5c3a1a;
-  margin-bottom: 6px;
-  font-family: 'PingFang SC', 'Microsoft YaHei', 'SimSun', 'Segoe UI', sans-serif;
-  letter-spacing: 0.3px;
-}
-
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #5c3a1a;
+    margin-bottom: 10px;
+  }
 
   .profile-tags {
-    margin-bottom: 20px;
+    margin-top: 10px;
   }
 
   .profile-tags span.user-badge {
@@ -71,7 +61,6 @@
     font-size: 0.9rem;
     margin: 4px 6px;
     display: inline-block;
-    font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
   }
 
   .profile-actions a {
@@ -96,26 +85,36 @@
     border-radius: 20px;
     padding: 8px 28px;
     font-size: 0.95rem;
-    font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
     transition: background-color 0.2s;
   }
 
   .profile-edit .btn:hover {
     background-color: #7a4c25;
-    color: #fff;
   }
 </style>
 
 <main>
   <div class="container profile-wrapper">
     <div class="profile-card position-relative">
-      <img id="avatar" class="profile-avatar position-absolute start-50 translate-middle-x"
-        style="top: 30px;" src="/static/img/avatar_1.jpg" alt="头像">
+      <img class="profile-avatar position-absolute start-50 translate-middle-x"
+        style="top: 30px;"
+        src="{{ user.image if user.image else '/static/img/avatar_1.jpg' }}" alt="头像">
+
       <div class="mt-5 pt-3">
-        <div id="name" class="profile-name">--</div>
-        <div id="user-email" class="profile-info">邮箱：--</div>
-        <div id="user-joined" class="profile-info" style="margin-bottom: 20px;">注册时间：--</div>
-        <div id="user-tags" class="profile-tags">喜好：--</div>
+        <div class="profile-name">{{ user.name or "未命名用户" }}</div>
+        <div class="profile-info">邮箱：{{ user.email or "--" }}</div>
+        <div class="profile-info">注册时间：{{ user.createdAt.strftime('%Y-%m-%d') if user.createdAt else "--" }}</div>
+
+        <div class="profile-tags">
+          喜好：
+          {% if user.tags %}
+            {% for tag in user.tags %}
+              <span class="user-badge">{{ tag }}</span>
+            {% endfor %}
+          {% else %}
+            <span class="user-badge">🍰 甜品</span>
+          {% endif %}
+        </div>
 
         <div class="profile-actions my-3">
           <a href="/my-reviews"><i class="bi bi-chat-dots"></i> 发布的评价</a>
@@ -123,73 +122,10 @@
         </div>
 
         <div class="profile-edit">
-           <a href="/edit_profile.html" class="btn">编辑资料</a>
+          <a href="/edit_profile" class="btn">编辑资料</a>
         </div>
       </div>
     </div>
   </div>
 </main>
-{% endblock %}
-
-{% block scripts %}
-<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-  const userId = localStorage.getItem("userId");
-  if (!userId) return window.location.href = "/login";
-
-  const profileKey = `profileData_${userId}`;
-  const joinedKey = `joined_${userId}`;
-  const nameKey = `username_${userId}`;
-  const profileData = JSON.parse(localStorage.getItem(profileKey) || "{}");
-
-  // 注册时间
-  if (!localStorage.getItem(joinedKey)) {
-    const now = new Date();
-    const formatted = now.getFullYear() + '-' +
-      String(now.getMonth() + 1).padStart(2, '0') + '-' +
-      String(now.getDate()).padStart(2, '0');
-    localStorage.setItem(joinedKey, formatted);
-  }
-  const joinedTime = localStorage.getItem(joinedKey) || "--";
-  document.getElementById("user-joined").textContent = "注册时间：" + joinedTime;
-
-  // 昵称优先级
-  const nameElement = document.getElementById("name");
-  nameElement.textContent = profileData.name || localStorage.getItem(nameKey) || "--";
-
-  // 偏好标签
-  const tagList = profileData.tags || ["🍰 甜品"];
-  const tagContainer = document.getElementById("user-tags");
-  tagContainer.innerHTML = "喜好：";
-  tagList.forEach(tag => {
-    const span = document.createElement("span");
-    span.className = "user-badge";
-    span.textContent = tag;
-    tagContainer.appendChild(span);
-  });
-
-  // 邮箱和头像
-  axios.get(`/api/users/${userId}`).then(res => {
-    const user = res.data;
-    const emailElement = document.getElementById("user-email");
-    const email = user.email || profileData.email || "--";
-    emailElement.textContent = "邮箱：" + email;
-
-    if (!profileData.email && user.email) {
-      profileData.email = user.email;
-      localStorage.setItem(profileKey, JSON.stringify(profileData));
-    }
-
-    const avatar = document.getElementById("avatar");
-    avatar.src = user.avatar ? `/static/img/${user.avatar}` : "/static/img/avatar_1.jpg";
-
-    if (!profileData.name && user.name) {
-      nameElement.textContent = user.name;
-    }
-  }).catch(err => {
-    console.error("用户数据加载失败：", err);
-  });
-});
-</script>
 {% endblock %}

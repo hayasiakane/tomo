@@ -3,23 +3,35 @@
 {% block title %}{{ restaurant.name }} - 美食点评网{% endblock %}
 
 {% block content %}
-<div class="row mb-4">
-    <div class="col-md-8">
-        <div class="card">
+<div class="row mb-4 align-items-stretch">
+    <div class="col-md-6">
+        <div class="card h-100">
             <div class="card-body">
+                <!-- 展示评分 -->
                 <div class="d-flex justify-content-between align-items-start">
                     <div>
                         <h1 class="card-title">{{ restaurant.name }}</h1>
                         <div class="rating mb-2">
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-half"></i>
-                            <span class="ms-1">4.5 ({{ restaurant.reviewCount }}条评价)</span>
+                            {% for _ in range(5) %}
+                                {% if loop.index <= restaurant.average_rating|round(0) %}
+                                    <i class="bi bi-star-fill"></i>
+                                {% elif loop.index - 0.5 <= restaurant.average_rating|round(1) %}
+                                    <i class="bi bi-star-half"></i>
+                                {% else %}
+                                    <i class="bi bi-star"></i>
+                                {% endif %}
+                            {% endfor %}
+                            <span class="ms-1">{{ restaurant.average_rating|round(1) }} ({{ restaurant.review_count }}条评价)</span>
                         </div>
                     </div>
-                    <button class="btn btn-outline-primary" id="write-review-btn">写评价</button>
+                    <div class="d-flex flex-column align-items-end gap-2">
+                        <button class="btn btn-outline-primary" id="write-review-btn">写评价</button>
+                        <!-- 添加封面图按钮默认隐藏 -->
+                        <button class="btn btn-outline-primary d-none" id="add-restaurant-image-btn">添加封面图</button>
+
+                        <!-- 在某处添加隐藏字段存储 restaurant.userId -->
+                        <input type="hidden" id="restaurant-owner-id" value="{{ restaurant.userId }}">
+                    </div>
                 </div>
                 
                 <p class="text-muted">
@@ -36,50 +48,55 @@
                     <h5>营业时间</h5>
                     <p>周一至周日: 10:00 - 22:00</p>
                 </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card">
-            <div class="card-body">
+
                 <h5 class="card-title">联系方式</h5>
-                <p><i class="bi bi-telephone"></i> 123-4567-8910</p>
-                <p><i class="bi bi-globe"></i> www.example.com</p>
-                
-                <div class="mt-4">
-                    <h5>位置</h5>
-                    <div id="map" style="height: 200px; background-color: #eee; border-radius: 5px;"></div>
-                </div>
+                <p><i class="bi bi-telephone"></i>
+                    {% if restaurant.phone %} {{ restaurant.phone }}
+                    {% else %} 123-4567-8910 {% endif %}
+                </p>
+                <p><i class="bi bi-globe"></i>
+                    {% if restaurant.website %}
+                        <a href="{{ restaurant.website if restaurant.website.startswith('http') else 'http://' ~ restaurant.website }}"
+                        target="_blank">{{ restaurant.website }}</a>
+                    {% else %} www.example.com {% endif %}
+                </p>
+
             </div>
         </div>
     </div>
+
+
+    <div class="col-md-6">
+    <div class="card h-100 d-flex flex-column">
+        <div class="card-body d-flex flex-column">
+        <h5 class="fw-bold text-primary mb-3" style="letter-spacing: 1.5px; font-size: 1.2rem;">
+            <i class="bi bi-image"></i> 餐厅环境
+        </h5>
+
+        <div class="flex-grow-1 d-flex align-items-center justify-content-center">
+            <div id="restaurantCarousel" class="carousel slide w-100" data-bs-ride="carousel" style="max-height: 400px;">
+            <div class="carousel-indicators" id="carousel-indicators"></div>
+            <div class="carousel-inner rounded-4 shadow-sm overflow-hidden" id="carousel-inner" style="max-height: 400px;"></div>
+
+            <button class="carousel-control-prev" type="button" data-bs-target="#restaurantCarousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">上一张</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#restaurantCarousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">下一张</span>
+            </button>
+            </div>
+        </div>
+        </div>
+    </div>
+    </div>
+
+
 </div>
 
 <div class="row">
     <div class="col-12">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h2>评价</h2>
-            <div class="dropdown">
-                <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="sort-reviews" data-bs-toggle="dropdown">
-                    排序方式
-                </button>
-                <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="#" data-sort="latest">最新评价</a></li>
-                    <li><a class="dropdown-item" href="#" data-sort="highest">最高评分</a></li>
-                    <li><a class="dropdown-item" href="#" data-sort="lowest">最低评分</a></li>
-                </ul>
-            </div>
-        </div>
-        
-        <div id="reviews-container">
-            <!-- 评价将通过JavaScript动态加载 -->
-            <div class="text-center py-4">
-                <div class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">加载中...</span>
-                </div>
-            </div>
-        </div>
-        
         <!-- 添加评价表单 (默认隐藏) -->
         <div class="card mt-4 d-none" id="review-form-container">
             <div class="card-body">
@@ -105,23 +122,100 @@
                 </form>
             </div>
         </div>
+
+        <!-- 添加封面图表单 (默认隐藏) -->
+        <div class="card mt-4 d-none" id="add-image-form-container">
+            <div class="card-body">
+                <h5 class="card-title">添加封面图</h5>
+                <form id="add-image-form">
+                    <div class="mb-3">
+                        <label for="image-file" class="form-label">选择图片</label>
+                        <input type="file" class="form-control" id="image-file" accept="image/*" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">上传图片</button>
+                    <button type="button" class="btn btn-outline-secondary ms-2" id="cancel-image-upload">取消</button>
+                </form>
+            </div>
+        </div>
+
+
+        <!-- 评价部分 -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2>评价</h2>
+            <div class="dropdown">
+                <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="sort-reviews" data-bs-toggle="dropdown">
+                    排序方式
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="#" data-sort="latest">最新评价</a></li>
+                    <li><a class="dropdown-item" href="#" data-sort="highest">最高评分</a></li>
+                    <li><a class="dropdown-item" href="#" data-sort="lowest">最低评分</a></li>
+                </ul>
+            </div>
+        </div>
+        
+        <div id="reviews-container">
+            <!-- 评价将通过JavaScript动态加载 -->
+            <div class="text-center py-4">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">加载中...</span>
+                </div>
+            </div>
+        </div>
+        
+
     </div>
 </div>
 {% endblock %}
 
 {% block scripts %}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const restaurantId = window.location.pathname.split('/')[2];
+    document.addEventListener('DOMContentLoaded', function() {
+        // 获取当前URL的路径部分
+        const path = window.location.pathname; // "/api/restaurants/show/8"
+
+        // 按 "/" 分割路径，取最后一部分
+        const parts = path.split('/');
+        const restaurantId = parts[parts.length - 1]; // "8"
     
-    // 加载评价
-    function loadReviews(sort = 'latest') {
-        axios.get(`/api/restaurants/${restaurantId}/reviews?sort=${sort}`)
-            .then(response => {
+
+        // 获取用户姓名和头像，返回 Promise<string>
+        function getUserInfoById(userId) {
+            return axios.get(`/api/users/${userId}`)
+                .then(response => ({
+                    name: response.data.name || '匿名用户',
+                    image: response.data.image || '/static/img/avatar_1.jpg'
+                }))
+                .catch(error => {
+                    console.error('获取用户信息失败:', error);
+                    return {
+                        name: '匿名用户',
+                        image: '/static/img/avatar_1.jpg'
+                    };
+                });
+        }
+
+
+        const ownerId = document.getElementById('restaurant-owner-id').value;
+        const currentUserId = localStorage.getItem('userId');
+
+        // 只有当前用户是该餐厅拥有者时显示按钮
+        if (currentUserId && ownerId && currentUserId === ownerId) {
+            const btn = document.getElementById('add-restaurant-image-btn');
+            if (btn) btn.classList.remove('d-none');
+        }
+
+
+        async function loadReviews(sort = 'latest', page = 1, perPage = 5) {
+            try {
+                const response = await axios.get(`/api/reviews/get/${restaurantId}?sort=${sort}&page=${page}&per_page=${perPage}`);
                 const container = document.getElementById('reviews-container');
                 container.innerHTML = '';
-                
-                if (response.data.reviews.length === 0) {
+
+                const reviews = response.data.reviews;
+                const totalPages = response.data.total_pages;
+
+                if (reviews.length === 0) {
                     container.innerHTML = `
                         <div class="alert alert-info">
                             暂无评价，成为第一个评价的人吧！
@@ -129,57 +223,85 @@ document.addEventListener('DOMContentLoaded', function() {
                     `;
                     return;
                 }
-                
-                response.data.reviews.forEach(review => {
-                    const reviewHtml = `
-                        <div class="card mb-3">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between mb-2">
-                                    <h5 class="card-title">${review.user.name}</h5>
-                                    <div class="rating">
-                                        ${'<i class="bi bi-star-fill"></i>'.repeat(review.rating)}
-                                        ${'<i class="bi bi-star"></i>'.repeat(5 - review.rating)}
-                                    </div>
+
+                // 并发获取用户名
+                const userInfoPromises = reviews.map(r => getUserInfoById(r.userId));
+                const userInfos = await Promise.all(userInfoPromises);
+
+
+                reviews.forEach((review, idx) => {
+                    const { name: userName, image: userImage } = userInfos[idx];
+                    const createdAt = new Date(review.createdAt).toLocaleDateString();
+
+                const reviewHtml = `
+                    <div class="card mb-3 shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div class="d-flex align-items-center">
+                                    <img src="${userImage}" class="rounded-circle me-3" width="48" height="48" style="object-fit: cover;">
+                                    <h5 class="mb-0">${userName}</h5>
                                 </div>
-                                <p class="card-text">${review.content}</p>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <small class="text-muted">${new Date(review.timestamp).toLocaleDateString()}</small>
-                                    ${review.reply ? `<button class="btn btn-sm btn-outline-primary" data-bs-toggle="collapse" data-bs-target="#reply-${review.reviewId}">查看回复</button>` : ''}
+                                <div class="text-warning">
+                                    ${'<i class="bi bi-star-fill"></i>'.repeat(review.rating)}
+                                    ${'<i class="bi bi-star"></i>'.repeat(5 - review.rating)}
                                 </div>
-                                
-                                ${review.reply ? `
-                                <div class="collapse mt-3" id="reply-${review.reviewId}">
-                                    <div class="card card-body bg-light">
-                                        <div class="d-flex justify-content-between">
-                                            <strong>商家回复</strong>
-                                            <small class="text-muted">${new Date(review.reply.timestamp).toLocaleDateString()}</small>
-                                        </div>
-                                        <p>${review.reply.content}</p>
-                                    </div>
-                                </div>
-                                ` : ''}
+                            </div>
+                            <p class="card-text mt-2">${review.content}</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">${createdAt}</small>
                             </div>
                         </div>
-                    `;
+                    </div>
+                `;
+
+
                     container.innerHTML += reviewHtml;
                 });
-            })
-            .catch(error => {
+
+                // 添加分页控件
+                const pagination = document.createElement('nav');
+                let html = '<ul class="pagination justify-content-center mt-3">';
+                for (let i = 1; i <= totalPages; i++) {
+                    html += `
+                        <li class="page-item ${i === page ? 'active' : ''}">
+                            <a class="page-link" href="#" data-page="${i}" data-sort="${sort}">${i}</a>
+                        </li>
+                    `;
+                }
+                html += '</ul>';
+                pagination.innerHTML = html;
+                container.appendChild(pagination);
+
+                // 绑定分页点击事件
+                container.querySelectorAll('.page-link').forEach(link => {
+                    link.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        const newPage = parseInt(this.dataset.page);
+                        const currentSort = this.dataset.sort;
+                        loadReviews(currentSort, newPage, perPage);
+                    });
+                });
+
+            } catch (error) {
                 console.error('获取评价失败:', error);
-            });
-    }
+            }
+        }
+
+
     
     // 初始加载评价
-    loadReviews();
+    loadReviews('latest', 1, 5);
     
     // 排序评价
     document.querySelectorAll('[data-sort]').forEach(item => {
         item.addEventListener('click', function(e) {
             e.preventDefault();
             const sort = this.getAttribute('data-sort');
-            loadReviews(sort);
+            loadReviews(sort, 1); // 切换排序后，回到第一页
         });
     });
+
+
     
     // 显示/隐藏评价表单
     document.getElementById('write-review-btn').addEventListener('click', function() {
@@ -192,10 +314,29 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('review-form-container').classList.remove('d-none');
         this.disabled = true;
     });
+
+    // 显示/隐藏添加封面图表单
+    document.getElementById('add-restaurant-image-btn').addEventListener('click', function() {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = '/login?returnTo=' + encodeURIComponent(window.location.pathname);
+            return;
+        }
+        
+        document.getElementById('add-image-form-container').classList.remove('d-none');
+        this.disabled = true;
+    });
     
+    // 取消评论
     document.getElementById('cancel-review').addEventListener('click', function() {
         document.getElementById('review-form-container').classList.add('d-none');
         document.getElementById('write-review-btn').disabled = false;
+    });
+
+    // 取消添加封面图
+    document.getElementById('cancel-image-upload').addEventListener('click', function() {
+        document.getElementById('add-image-form-container').classList.add('d-none');
+        document.getElementById('add-restaurant-image-btn').disabled = false;
     });
     
     // 评分选择
@@ -225,6 +366,12 @@ document.addEventListener('DOMContentLoaded', function() {
         const userId = localStorage.getItem('userId');
         const rating = document.getElementById('rating-value').value;
         const content = document.getElementById('review-content').value;
+        // 获取当前URL的路径部分
+        const path = window.location.pathname; // "/api/restaurants/show/8"
+
+        // 按 "/" 分割路径，取最后一部分
+        const parts = path.split('/');
+        const restaurantId = parts[parts.length - 1]; // "8"
         
         if (!token || !userId) {
             window.location.href = '/login';
@@ -236,12 +383,12 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
-        axios.post(`/api/restaurants/${restaurantId}/reviews`, {
+        axios.post(`/api/reviews/add/${restaurantId}`, {
             content: content,
-            rating: rating
+            rating: rating,
+            userId: userId
         }, {
             headers: {
-                'X-User-ID': userId,
                 'Authorization': `Bearer ${token}`
             }
         })
@@ -266,15 +413,118 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('提交评价失败: ' + (error.response?.data?.error || '请稍后再试'));
         });
     });
-    
-    // 简单的地图初始化
-    function initMap() {
-        // 这里可以集成真实的地图服务如Google Maps或百度地图
-        const mapElement = document.getElementById('map');
-        mapElement.innerHTML = '<div class="d-flex justify-content-center align-items-center h-100 text-muted">地图位置</div>';
+
+
+    // 从后端获取餐厅图片信息
+    async function getRestaurantImages(restaurantId) {
+        try {
+            const response = await axios.get(`/api/restaurants/get_images/${restaurantId}`);
+            
+            if (response.data.images && response.data.images.length > 0) {
+                return response.data.images;
+            } else {
+                console.warn("No images found for restaurant:", restaurantId);
+                return []; // 返回空数组表示没有图片
+            }
+        } catch (error) {
+            console.error('获取餐厅图片失败:', error);
+            
+            // 根据错误类型处理
+            if (error.response) {
+                // 服务器返回了响应，但状态码不是2xx
+                if (error.response.status === 404) {
+                    console.warn("餐厅图片未找到");
+                } else {
+                    console.error('服务器错误:', error.response.status);
+                }
+            } else if (error.request) {
+                // 请求已发出，但没有收到响应
+                console.error('没有收到服务器响应');
+            } else {
+                // 其他错误
+                console.error('请求设置错误:', error.message);
+            }
+            
+            return []; // 出错时返回空数组
+        }
     }
-    
-    initMap();
+
+    getRestaurantImages(restaurantId).then(images => {
+        const indicators = document.getElementById('carousel-indicators');
+        const inner = document.getElementById('carousel-inner');
+
+        if (!images || images.length === 0) {
+            inner.innerHTML = `
+                <div class="carousel-item active">
+                    <img src="/static/images/restaurant-interior.jpg" class="d-block w-100 h-100" alt="默认图片" style="object-fit: cover;">
+                    <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-50 rounded p-2">
+                        <h5 class="mb-0">暂无图片</h5>
+                        <p class="mb-0 small">该餐厅尚未上传图片</p>
+                    </div>
+                </div>`;
+            return;
+        }
+
+        images.forEach((img, idx) => {
+            // 创建 indicator
+            const indicator = document.createElement('button');
+            indicator.type = 'button';
+            indicator.setAttribute('data-bs-target', '#restaurantCarousel');
+            indicator.setAttribute('data-bs-slide-to', idx.toString());
+            indicator.setAttribute('aria-label', `Slide ${idx + 1}`);
+            if (idx === 0) {
+                indicator.classList.add('active');
+                indicator.setAttribute('aria-current', 'true');
+            }
+            indicators.appendChild(indicator);
+
+            // 创建 carousel item
+            const item = document.createElement('div');
+            item.className = 'carousel-item' + (idx === 0 ? ' active' : '');
+            item.innerHTML = `
+            <img src="${img.image_path}" class="d-block mx-auto w-100 rounded-3" alt="餐厅图片${idx + 1}" style="max-height: 400px; object-fit: cover;">
+            `;
+            inner.appendChild(item);
+        });
+
+    });
+
+    // 添加图片上传处理
+    document.getElementById('add-image-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const fileInput = document.getElementById('image-file');
+        const file = fileInput.files[0];
+        
+        if (!file) {
+            alert('请选择一张图片！');
+            return;
+        }
+        
+        // 创建 FormData 对象，用于发送文件
+        const formData = new FormData();
+        formData.append('image', file); // 'image' 是后端接收的字段名
+        
+        try {
+            // 发送 POST 请求到后端
+            const response = await axios.post(`/api/restaurants/upload-image/${restaurantId}`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data' // 必须设置，否则后端无法接收文件
+                }
+            });
+            
+            alert('图片上传成功！');
+            console.log('服务器返回的图片路径:', response.data.imagePath);
+            
+            // 可以在这里更新 UI，比如显示新上传的图片
+            // 例如：document.getElementById('restaurant-image').src = response.data.imagePath;
+            
+        } catch (error) {
+            console.error('上传失败:', error);
+            alert('上传失败，请重试！');
+        }
+    });
+
 });
 </script>
 {% endblock %}

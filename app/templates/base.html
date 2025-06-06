@@ -255,8 +255,8 @@
             </li>
           </ul>
           <div class="d-flex" id="auth-buttons">
-            <a href="/login" class="btn btn-outline-light me-2">登录</a>
-            <a href="/register" class="btn btn-light">注册</a>
+            <a href="/auth/login" class="btn btn-outline-light me-2">登录</a>
+            <a href="/auth/register" class="btn btn-light">注册</a>
           </div>
           <div class="d-none" id="user-menu">
             <div class="dropdown">
@@ -271,14 +271,14 @@
               </button>
               <ul class="dropdown-menu dropdown-menu-end">
                 <li>
-                  <a class="dropdown-item" href="/profile.html">
-                    <i class="bi bi-person me-2"></i>个人资料</a
-                  >
+                <a class="dropdown-item" id="profile-link" href="#">
+                  <i class="bi bi-person me-2"></i>个人资料
+                </a>
+
                 </li>
                 <li>
                   <a class="dropdown-item" href="/my-restaurants"
-                    ><i class="bi bi-shop-window me-2"></i>我的餐厅</a
-                  >
+                    ><i class="bi bi-shop-window me-2"></i>我的餐厅</a>
                 </li>
                 <li><hr class="dropdown-divider" /></li>
                 <li>
@@ -327,6 +327,14 @@
     <script>
       // 欢迎屏动画 - 只在首次访问时显示
       document.addEventListener("DOMContentLoaded", function () {
+        const userId = localStorage.getItem("userId");
+        if (userId) {
+          const profileLink = document.getElementById("profile-link");
+          if (profileLink) {
+            profileLink.href = `/profile/${userId}`;
+          }
+        }
+
         const welcomeScreen = document.getElementById("welcome-screen");
 
         // 检查是否是首次访问
@@ -352,7 +360,8 @@
         const userId = localStorage.getItem("userId");
         
         // 主昵称：用户编辑保存后的昵称
-        let username = localStorage.getItem(`username_${userId}`);
+        // let username = localStorage.getItem(`username_${userId}`);
+        const username = localStorage.getItem("username");
 
         // 如果没设置（比如刚注册），就尝试后端 profileData 中的昵称
         if (!username) {

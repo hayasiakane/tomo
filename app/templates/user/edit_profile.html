@@ -74,6 +74,11 @@
         <label for="inputName" class="form-label">昵称</label>
         <input type="text" class="form-control" id="inputName" placeholder="请输入昵称">
       </div>
+      <div class="mb-3">
+        <label for="image" class="form-label">头像</label>
+        <input type="file" class="form-control" id="image" accept="image/*">
+      </div>
+
 
       <div class="mb-3">
         <label class="form-label">邮箱</label>
@@ -132,30 +137,32 @@ document.addEventListener("DOMContentLoaded", function () {
     const user = res.data;
     const email = user.email || "（未设置）";
     document.getElementById("inputEmail").textContent = email;
-    localStorage.setItem(`email_${userId}`, email);
+    // localStorage.setItem(`email_${userId}`, email);
   });
 
   document.getElementById("profileForm").addEventListener("submit", function (e) {
     e.preventDefault();
+
     const name = document.getElementById("inputName").value.trim();
+    const imageFile = document.getElementById("image").files[0];
     const tags = Array.from(select.selectedOptions).map(opt => opt.text);
-    const email = localStorage.getItem(`email_${userId}`) || "（未设置）";
 
-    const updated = { name, email, joined, tags };
-    localStorage.setItem(profileKey, JSON.stringify(updated));
-    localStorage.setItem(nameKey, name);
-    localStorage.setItem(joinedKey, joined);
+    const formData = new FormData();
+    formData.append("userId", userId);
+    formData.append("name", name);
+    if (imageFile) formData.append("image", imageFile); // 头像文件
 
-    // ✅ 新增：同步更新昵称到数据库
-    axios.put("/api/users/update", {
-      userId: userId,
-      name: name
+    axios.post("/api/users/update", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data"
+      }
     }).then(() => {
-      window.location.href = "/profile.html"; // 成功后跳转
+      window.location.href = `/profile/${userId}`;
     }).catch(err => {
       alert("修改失败：" + (err.response?.data?.error || err.message));
     });
   });
+
 });
 </script>
 {% endblock %}

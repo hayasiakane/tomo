@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}{{ friend.name }}的主页 - TOMO食光{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+  <!-- 好友基本信息卡片 -->
+  <div class="card mb-4 shadow">
+    <div class="row g-0 align-items-center">
+      <div class="col-md-3 text-center p-3">
+        <img src="{{ friend.image or url_for('static', filename='img/avatar_1.jpg') }}"
+             class="img-fluid rounded-circle shadow"
+             style="width: 150px; height: 150px; object-fit: cover;"
+             alt="头像"
+             onerror="this.src='/static/img/avatar_1.jpg'; this.onerror=null;">
+      </div>
+      <div class="col-md-9">
+        <div class="card-body">
+          <h3 class="card-title">{{ friend.name }}</h3>
+          <p class="card-text text-muted">{{ friend.email }}</p>
+          <p class="card-text"><small class="text-muted">加入时间：{{ friend.createdAt.strftime('%Y-%m-%d') }}</small></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 餐厅列表 -->
+  <div class="mb-5">
+    <h4 class="mb-3">Ta 的餐厅</h4>
+    {% if restaurant and restaurant|length > 0 %}
+      <div class="row">
+        {% for r in restaurant %}
+        <div class="col-md-4 mb-4">
+          <a href="/api/restaurants/show/{{r.restaurantId}}" style="text-decoration: none; color: inherit;">
+            <div class="card h-100 shadow-sm">
+              <div class="card-body">
+                <h5 class="card-title">{{ r.name }}</h5>
+                <p class="card-text text-muted">{{ r.address }}</p>
+                <p><span class="badge bg-secondary">{{ r.cuisine }}</span></p>
+                <p class="card-text">{{ r.description[:80] }}{% if r.description|length > 80 %}...{% endif %}</p>
+              </div>
+            </div>
+          </a>
+        </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="text-muted">Ta 还没有发布过餐厅。</p>
+    {% endif %}
+  </div>
+
+  <!-- 评价列表 -->
+  <div class="mb-5">
+    <h4 class="mb-3">Ta 的美食评价</h4>
+    {% if reviews and reviews|length > 0 %}
+      {% for review in reviews %}
+      <div class="card mb-3 shadow-sm">
+        <div class="card-body">
+          <!-- 添加餐厅名称 -->
+          <h5 class="card-title">{{ review.restaurant_name }}</h5>
+          <div class="d-flex justify-content-between">
+            <div>
+              <strong>评分：</strong>
+              {% for i in range(1, 6) %}
+                <i class="bi {{ 'bi-star-fill' if i <= review.rating else 'bi-star' }}"></i>
+              {% endfor %}
+            </div>
+            <small class="text-muted">{{ review.createdAt.strftime('%Y-%m-%d') }}</small>
+          </div>
+          <p class="mt-2">{{ review.content }}</p>
+        </div>
+      </div>
+      {% endfor %}
+    {% else %}
+      <p class="text-muted">Ta 还没有写过评价。</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
