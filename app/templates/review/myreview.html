@@ -100,7 +100,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         try {
             // 尝试从API获取数据
-            const response = await axios.get(`/api/reviews/display-all/${userId}?search=${search}&rating=${rating}`);
+            const response = await axios.get(`/api/reviews/display-all/${userId}?search=${search}&rating=${rating}&sort=${sort}&page=${page}`);
             
             if (response.data && response.data.reviews) {
                 await displayReviews(response.data.reviews); // 使用 await 等待 displayReviews 完成
@@ -228,7 +228,8 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('filter-btn').addEventListener('click', function () {
         const search = document.getElementById('search-input').value;
         const rating = document.getElementById('rating-filter').value;
-        loadReviews(1, search, rating, "");
+        const dateFilter = document.getElementById('date-filter').value;
+        loadReviews(1, search, rating, dateFilter);
     });
 
 

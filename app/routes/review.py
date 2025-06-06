@@ -69,9 +69,20 @@ def api_add_review(restaurant_id):
 def api_get_reviews(restaurant_id):
     page = int(request.args.get('page', 1))  # 当前页
     per_page = int(request.args.get('per_page', 5))  # 每页几条
+    sort = request.args.get('sort', 'latest')  # 排序方式
 
-    query = review.query.filter_by(restaurantId=restaurant_id).order_by(review.createdAt.desc())
+    # 构造查询对象
+    query = review.query.filter_by(restaurantId=restaurant_id)
 
+    # 应用排序规则
+    if sort == 'lowest':
+        query = query.order_by(review.rating.asc())
+    elif sort == 'highest':
+        query = query.order_by(review.rating.desc())
+    else:  # 默认是 latest
+        query = query.order_by(review.createdAt.desc())
+
+    # 总数与分页
     total_reviews = query.count()
     reviews = query.offset((page - 1) * per_page).limit(per_page).all()
 
@@ -98,6 +109,8 @@ def api_get_reviews(restaurant_id):
 def api_display_all_reviews(user_id):
     search = request.args.get('search', '').strip()
     rating = request.args.get('rating', '').strip()
+    sort = request.args.get('sort', '').strip()  # 排序方式
+    # print(f"Search: {search}, Rating: {rating}, Sort: {sort}")
     # 构造查询条件
     query = review.query
 
@@ -110,6 +123,11 @@ def api_display_all_reviews(user_id):
             query = query.filter(review.rating == rating)
         except ValueError:
             return {'message': 'Invalid rating value'}, 400
+
+    if sort == 'newest':
+        query = query.order_by(review.createdAt.desc())
+    elif sort == 'oldest':
+        query = query.order_by(review.createdAt.asc())
 
     # 执行查询
     reviews = query.filter_by(userId=user_id).all()
