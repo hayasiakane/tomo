@@ -9,12 +9,10 @@ from werkzeug.utils import secure_filename
 restaurant_bp = Blueprint('restaurant', __name__)
 
 @restaurant_bp.route('/add', methods=['POST'])
-# @login_required
-# @business_account_required
 def api_add_restaurant():
-    print("Received request to add restaurant")  # 确保这行能打印，证明请求到达了后端
+    print("Received request to add restaurant")
 
-    # 从 FormData 中获取普通字段（如 userId, name, address 等）
+    # 获取字段
     user_id = request.form.get('userId')
     name = request.form.get('name')
     address = request.form.get('address')
@@ -23,14 +21,10 @@ def api_add_restaurant():
     phone = request.form.get('phone')
     website = request.form.get('website')
 
-    # 检查必填字段
     if not all([user_id, name, address, cuisine]):
         return jsonify({"error": "Missing required fields"}), 400
 
-    # 处理图片（如果是多文件，需要遍历）
-    images = request.files.getlist('images')  # 获取所有上传的图片文件
-
-    # 创建新餐厅对象
+    # Step 1: 先创建餐厅对象但不含图片路径
     new_restaurant = Restaurant(
         userId=user_id,
         name=name,
@@ -38,30 +32,44 @@ def api_add_restaurant():
         cuisine=cuisine,
         description=description,
         phone=phone,
-        website=website
+        website=website,
+        image=None  # 暂时为空
     )
-
-    # 处理图片上传
-    if images:
-        for image in images:
-            if image :  # 可选：检查文件类型
-                # 将图片路径保存到数据库
-                new_restaurant_image = Restaurant_images(
-                    image_id=None,
-                    restaurantId=restaurantId,
-                    image_path=save_path  # 或者存储相对路径，如 'uploads/filename.jpg'
-                )
-                db.session.add(new_restaurant_image)
 
     try:
         db.session.add(new_restaurant)
         db.session.commit()
-        # 添加成功返回餐厅id
-        restaurantId = new_restaurant.restaurantId
-        return jsonify({"message": "Restaurant added successfully", "restaurantId": restaurantId}), 201
+
+        # Step 2: 获取生成的 restaurantId
+        restaurant_id = new_restaurant.restaurantId
+
+        # Step 3: 处理封面图
+        cover_image = request.files.get('coverImage')
+        if cover_image:
+            filename = secure_filename(cover_image.filename)
+            upload_folder = os.path.join(current_app.root_path, f'static/restaurant_images/{restaurant_id}')
+            os.makedirs(upload_folder, exist_ok=True)
+            file_path = os.path.join(upload_folder, filename)
+            cover_image.save(file_path)
+            image_path = f"static/restaurant_images/{restaurant_id}/{filename}"
+
+            # 更新图片路径
+            new_restaurant.image = image_path
+            db.session.commit()  # 提交更新
+
+        return jsonify({
+            "message": "Restaurant added successfully",
+            "restaurantId": restaurant_id
+        }), 201
+
     except Exception as e:
         db.session.rollback()
-        return jsonify({"message": "An error occurred while adding restaurant", "error": str(e)}), 500
+        return jsonify({
+            "message": "An error occurred while adding restaurant",
+            "error": str(e)
+        }), 500
+
+
 
 @restaurant_bp.route('/<restaurant_id>', methods=['GET'])
 def api_get_restaurant(restaurant_id):
@@ -173,7 +181,7 @@ def upload_restaurant_image(restaurant_id):
 
     if image:
         # 确保目录存在
-        save_dir = f'app/static/restaurant_images/{restaurant_id}'
+        save_dir = f'static/restaurant_images/{restaurant_id}'
         os.makedirs(save_dir, exist_ok=True)
 
         # 安全地保存文件名（防止路径遍历攻击）

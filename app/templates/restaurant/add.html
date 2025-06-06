@@ -48,9 +48,9 @@
                         <input type="text" class="form-control" id="opening-hours" placeholder="例如: 10:00-22:00">
                     </div>
                     <div class="mb-3">
-                        <label for="images" class="form-label">餐厅图片</label>
-                        <input type="file" class="form-control" id="images" multiple accept="image/*">
-                        <div class="form-text">最多上传5张图片</div>
+                        <label for="coverImage" class="form-label">餐厅封面图</label>
+                        <input type="file" class="form-control" id="coverImage" accept="image/*" required>
+                        <div class="form-text">仅支持上传一张封面图片</div>
                     </div>
                     <div class="d-grid gap-2 mt-4">
                         <button type="submit" class="btn btn-primary">添加餐厅</button>
@@ -104,13 +104,11 @@ document.addEventListener('DOMContentLoaded', function() {
         formData.append('website', document.getElementById('website').value);
         // formData.append('openingHours', document.getElementById('opening-hours').value);
         
-        // 添加图片（如果是多文件，需要多次 append）
-        const images = document.getElementById('images').files;
-        if (images.length > 0) {
-            for (const file of images) {
-                formData.append('images', file);  // 多个文件需要多次 append
-            }
+        const coverImage = document.getElementById('coverImage').files[0];
+        if (coverImage) {
+            formData.append('coverImage', coverImage);
         }
+
         
         // 2. 发送请求（使用 FormData，不需要手动设置 Content-Type）
         axios.post('/api/restaurants/add', formData, {  // 注意末尾的 `/`
