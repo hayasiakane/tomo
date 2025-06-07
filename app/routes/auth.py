@@ -1,7 +1,7 @@
 import sys
 import os
 from app.extensions import db  # 导入数据库
-from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
+from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, make_response
 from flask_jwt_extended import create_access_token  # 导入JWT相关函数
 # from werkzeug.security import check_password_hash  # 导入密码哈希验证函数
 from app.models.user import User  # 导入User模型
@@ -34,17 +34,26 @@ def api_login():
         return jsonify({"error": "无效的邮箱或密码"}), 401
     
     token = create_access_token(identity=str(user.userId)) # 生成JWT令牌，identity为用户ID
-    # # 设置cookie
-    # request.set_cookie('user_id', user.userId, httponly=False, secure=True)  # 设置HTTPOnly和Secure属性
 
-    # 生成响应（实际项目应使用JWT）
-    return jsonify({
+    # 创建响应对象并设置Cookie（如果需要）
+    response = make_response(jsonify({
         "message": "登录成功",
         "userId": user.userId,
         "name": user.name,
         "token": token,
         "type": user.type
-    }), 200
+    }))
+    
+    # 设置Cookie（可选，如果确实需要）
+    # 注意：如果使用JWT，通常不需要额外设置user_id的Cookie
+    # 这里保留你的原始需求，但实际项目中可能不需要
+    response.set_cookie(
+        'user_id', 
+        str(user.userId), 
+        httponly=False,  # 如果设为True更安全，但JS无法访问
+        secure=True      # 仅HTTPS传输
+    )
+    return response, 200
 
 @auth_bp.route('/register', methods=['GET'])
 def show_register_page():

@@ -132,7 +132,7 @@ def api_display_all_restaurants():
 
 
 @restaurant_bp.route('/my-restaurants/<user_id>', methods=['GET'])
-# @login_required
+@login_required
 @business_account_required
 def my_restaurants(user_id):
     """  显示当前用户的餐厅列表  """
@@ -181,7 +181,7 @@ def upload_restaurant_image(restaurant_id):
 
     if image:
         # 确保目录存在
-        save_dir = f'static/restaurant_images/{restaurant_id}'
+        save_dir = os.path.join(current_app.root_path, f'static/restaurant_images/{restaurant_id}')
         os.makedirs(save_dir, exist_ok=True)
 
         # 安全地保存文件名（防止路径遍历攻击）

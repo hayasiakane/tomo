@@ -8,7 +8,7 @@ from app.models.restaurant import Restaurant
 review_bp = Blueprint('review', __name__)
 
 @review_bp.route('/add/<restaurant_id>', methods=['POST'])
-# @login_required
+@login_required
 def api_add_review(restaurant_id):
 
     data = request.get_json()  # 避免重复获取

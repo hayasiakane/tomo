@@ -1,5 +1,6 @@
 from functools import wraps
 from flask import request, redirect, url_for, flash
+from app.models.user import User
 
 def login_required(f):
     @wraps(f)
@@ -17,8 +18,8 @@ def business_account_required(f):
         from app.models.user import User
         
         user_id = request.cookies.get('user_id')
-        user, error = User.get_by_id(user_id)
-        if error or user.get('type') != 'business':
+        user = User.query.get(user_id)
+        if user.get('type') != 'business':
             flash('需要商家账号才能执行此操作', 'danger')
             return redirect(url_for('main.index'))
         

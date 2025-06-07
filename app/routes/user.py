@@ -11,11 +11,12 @@ from app.extensions import db
 import os
 from werkzeug.utils import secure_filename
 from flask import current_app
+from app.utils.decorators import login_required
 
 user_bp = Blueprint('user', __name__, url_prefix='')  # 不加 /user 前缀
 
 @user_bp.route('/profile/<userid>')
-# @login_required
+@login_required
 def profile(userid):
     user = User.query.get(userid)
     if not user:
