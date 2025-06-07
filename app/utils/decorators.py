@@ -19,7 +19,7 @@ def business_account_required(f):
         
         user_id = request.cookies.get('user_id')
         user = User.query.get(user_id)
-        if user.get('type') != 'business':
+        if user.type != 'business':
             flash('需要商家账号才能执行此操作', 'danger')
             return redirect(url_for('main.index'))
         
