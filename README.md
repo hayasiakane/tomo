@@ -1,59 +1,45 @@
-# 开发笔记
+```bash
+venv\scripts\activate # 进入虚拟环境
+python run.py # 运行网站
+```
 
-## 文件目录结构
+首页功能：\\
+商家和用户有区别，可以点击不同菜系跳转到餐厅页面进行筛选 \\
+获取评价数最多的四个热门餐厅进行展示，可以点击用户头像进入其主页 \\
+获取最新的两个评价进行展示 \\
 
-food-review-demo/
-├── app/ # 主应用目录
-│ ├── **init**.py # 应用工厂函数和初始化
-│ ├── models/ # 数据模型和 Gremlin 操作 负责人 1：hayasiakane
-│ │ ├── **init**.py
-│ │ ├── user.py # 用户相关操作
-│ │ ├── restaurant.py # 餐厅相关操作
-│ │ ├── review.py # 评价相关操作
-│ │ └── friendship.py # 好友关系相关操作
-│ ├── routes/ # 路由和视图函数
-│ │ ├── **init**.py
-│ │ ├── auth.py # 认证相关路由 负责人 2：樊
-│ │ ├── user.py # 用户相关路由 负责人 2：樊
-│ │ ├── restaurant.py # 餐厅相关路由 负责人 3：季
-│ │ └── review.py # 评价相关路由 负责人 4：钟
-│ ├── static/ # 静态文件
-│ │ ├── css/
-│ │ ├── js/
-│ │ └── images/ # 图片资源目录
-│ ├── templates/ # HTML 模板
-│ │ ├── base.html # 基础模板 负责人 5：王
-│ │ ├── auth/ # 认证相关模板 负责人 5：王
-│ │ │ ├── login.html  
-│ │ │ └── register.html
-│ │ ├── restaurant/ # 餐厅相关模板 负责人 6：雷
-│ │ │ ├── list.html
-│ │ │ ├── detail.html
-│ │ │ └── add.html
-│ │ ├── user/ # 用户相关模板 负责人 7：叶婷
-│ │ │ ├── profile.html
-│ │ │ └── friends.html
-│ │ └── review/ # 评价相关模板 负责人 6：雷
-│ │ └── myreview.html
-│ ├── utils/ # 工具函数
-│ │ ├── **init**.py
-│ │ ├── auth.py # 认证工具
-│ │ └── decorators.py # 装饰器
-│ └── config.py # 应用配置
-├── tests/ # 测试目录 目前没有
-│ ├── **init**.py
-│ ├── test_models/
-│ └── test_routes/
-├── migrations/ # 数据库迁移脚本(如果需要),暂时没有
-├── venv/ # Python 虚拟环境(不应提交到版本控制)
-├── .env # 环境变量
-├── .gitignore # Git 忽略规则 当前文件夹你有什么不想被提交上去的可以写进去
-├── requirements.txt # Python 依赖 开发过程中有用到什么新的库也要即时添加进去
-├── README.md # 项目说明
-└── run.py # 网站启动文件
-└── config.py # 配置文件
-└──init.py # 项目初始化文件
-└── tomo.bat # 应用启动脚本 一般是用这个去更新你在开发中新添加的 python 模块，并且每次都是用这个去打开网站，然后用跳出来的地址去打开网站
+餐厅页面：\\ 
+可以按照搜索词或菜系进行筛选 \\
+商家的页面有添加餐厅按钮 \\
+
+评价页面：\\
+按照搜索、评分、新旧筛选 \\
+
+好友页面：\\
+展示自己关注的用户 \\
+
+添加餐厅页面：\\
+填写餐厅信息添加 \\
+
+餐厅详情页面：\\
+展示详细信息 \\
+写评价 \\
+商户自己的餐厅页面可以进行添加封面图 \\
+
+个人资料页面：\\
+展示个人信息 \\
+编辑信息 \\
+
+我的餐厅页面：\\
+展示自己的餐厅，可以进行添加展示图(详情页的图片，不是封面图)
+
+好友主页：\\
+查看其信息 \\
+进行关注或取关 \\
+展示其餐厅和评价，点击卡片可进入详情页 \\
+
+
+
 
 ## github 协同开发说明
 
@@ -77,7 +63,6 @@ food-review-demo/
 2.  拉取源文件
     `git clone https://github.com/hayasiakane/tomo.git`
 
-### 没下载 java 的要下载一下，推荐 JDK8 这个长期支持版本
 
 ### 提交过程
 
